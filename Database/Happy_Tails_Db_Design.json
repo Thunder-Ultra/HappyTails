@@ -1,0 +1,1199 @@
+{
+  "modelName": "NoSql Model for HappyTails",
+  "collections": [
+    {
+      "collectionName": "Users",
+      "type": "object",
+      "properties": [
+        {
+          "name": "_id",
+          "hackoladeMeta": {},
+          "isActivated": true,
+          "type": "objectId",
+          "error": {
+            "name": false,
+            "code": false
+          },
+          "GUID": "0efa531e-ecdd-4023-a0d2-406aedc03bb9"
+        },
+        {
+          "name": "name",
+          "hackoladeMeta": {},
+          "isActivated": true,
+          "type": "string",
+          "GUID": "6b93ccab-bde2-4d92-922a-a65485753c1a",
+          "error": {
+            "name": false,
+            "code": false
+          }
+        },
+        {
+          "name": "email",
+          "hackoladeMeta": {},
+          "isActivated": true,
+          "type": "string",
+          "GUID": "0682b3c5-cb23-4cfb-9987-45935d80bcf8",
+          "error": {
+            "name": false,
+            "code": false
+          }
+        },
+        {
+          "name": "is_admin",
+          "hackoladeMeta": {},
+          "isActivated": true,
+          "type": "boolean",
+          "GUID": "baaacb98-b8a8-4101-80cf-76aff903b349",
+          "default": "false",
+          "error": {}
+        },
+        {
+          "name": "password_hash",
+          "hackoladeMeta": {},
+          "isActivated": true,
+          "type": "string",
+          "GUID": "ca989f50-0334-4b4a-9157-014c2e93f918",
+          "error": {
+            "name": false,
+            "code": false
+          }
+        },
+        {
+          "name": "roles",
+          "hackoladeMeta": {},
+          "isActivated": true,
+          "type": "string",
+          "GUID": "c105af8a-152e-42b0-9d26-22a2137d3402",
+          "error": {
+            "name": false,
+            "code": false
+          }
+        },
+        {
+          "name": "address",
+          "hackoladeMeta": {},
+          "isActivated": true,
+          "type": "string",
+          "GUID": "e3ae4304-eb84-4e17-9c4c-c1da08609561",
+          "error": {
+            "name": false,
+            "code": false
+          }
+        },
+        {
+          "name": "pet_preferences",
+          "hackoladeMeta": {},
+          "isActivated": true,
+          "type": "string",
+          "GUID": "9a85de9c-7110-4b45-80bf-e9406afcc0f0",
+          "error": {
+            "name": false,
+            "code": false
+          }
+        },
+        {
+          "name": "joined_on",
+          "hackoladeMeta": {},
+          "isActivated": true,
+          "type": "date",
+          "primaryKey": false,
+          "GUID": "048764f5-0c37-4881-b222-68b848fae254",
+          "now": true,
+          "error": {}
+        },
+        {
+          "name": "my_pets",
+          "hackoladeMeta": {},
+          "isActivated": true,
+          "type": "array",
+          "properties": [
+            {
+              "hackoladeMeta": {},
+              "isActivated": true,
+              "type": "document",
+              "properties": [
+                {
+                  "name": "pet_id",
+                  "hackoladeMeta": {},
+                  "isActivated": true,
+                  "type": "objectId",
+                  "error": {
+                    "name": false,
+                    "code": false
+                  },
+                  "GUID": "f7c4bb24-37de-434f-bfe7-c15b93d1b693",
+                  "relationshipType": "Foreign Key",
+                  "foreignCollection": "3a9f654d-9487-44f8-9313-ed6ccbb4b00f",
+                  "foreignField": [
+                    "3a9f654d-9487-44f8-9313-ed6ccbb4b00f",
+                    "785fcda9-09e7-4c94-bbbb-780210e9865a"
+                  ],
+                  "parentRelationship": "404a0fc5-0c8e-4799-92bc-5132f910cd80"
+                },
+                {
+                  "name": " name",
+                  "hackoladeMeta": {},
+                  "isActivated": true,
+                  "type": "string",
+                  "error": {
+                    "name": false,
+                    "code": false
+                  },
+                  "GUID": "6041bb1a-6055-48bd-bb5a-db5b9cfee1b1",
+                  "relationshipType": "Foreign Key",
+                  "foreignCollection": "3a9f654d-9487-44f8-9313-ed6ccbb4b00f",
+                  "foreignField": [
+                    "3a9f654d-9487-44f8-9313-ed6ccbb4b00f",
+                    "bb87279c-338a-4159-b446-dd5199aedff7"
+                  ],
+                  "parentRelationship": "b1457208-7454-4eb7-91cc-e5c4c07f470e"
+                }
+              ],
+              "additionalProperties": false,
+              "GUID": "01c9c9f0-ca54-4a20-a11e-399f1fe1c994",
+              "arrayItem": true
+            }
+          ],
+          "additionalItems": true,
+          "GUID": "ce657094-3262-4625-a8c9-5489b7de4196",
+          "error": {}
+        }
+      ],
+      "definitions": {
+        "type": "definitions",
+        "properties": [],
+        "GUID": "aa951838-24ee-4425-af06-c38cad9f0b7a"
+      },
+      "isActivated": true,
+      "additionalProperties": false,
+      "validationLevel": "Off",
+      "validationAction": "Warn",
+      "storageEngineName": "WiredTiger",
+      "collectionUsers": [],
+      "indexes": [],
+      "collation": {},
+      "sharding": {
+        "unique": true,
+        "collation": "null"
+      },
+      "GUID": "f89ca160-1225-4dd7-9929-2f16fe13ba65",
+      "bucketId": "5f8e386a-1c73-43b3-bf0b-06ee623c4581",
+      "hackoladeMeta": {
+        "validationErrors": {}
+      }
+    },
+    {
+      "collectionName": "Pets",
+      "type": "object",
+      "properties": [
+        {
+          "name": "_id",
+          "hackoladeMeta": {},
+          "isActivated": true,
+          "type": "objectId",
+          "error": {
+            "name": false,
+            "code": false
+          },
+          "GUID": "785fcda9-09e7-4c94-bbbb-780210e9865a",
+          "childRelationships": [
+            "404a0fc5-0c8e-4799-92bc-5132f910cd80"
+          ]
+        },
+        {
+          "name": "name",
+          "hackoladeMeta": {},
+          "isActivated": true,
+          "type": "string",
+          "error": {
+            "enum": false,
+            "enums": false
+          },
+          "GUID": "bb87279c-338a-4159-b446-dd5199aedff7",
+          "enum": [
+            "Male",
+            "Female"
+          ],
+          "childRelationships": [
+            "b1457208-7454-4eb7-91cc-e5c4c07f470e"
+          ]
+        },
+        {
+          "name": "gender",
+          "hackoladeMeta": {},
+          "isActivated": true,
+          "type": "string",
+          "error": {
+            "enum": false,
+            "enums": false
+          },
+          "primaryKey": false,
+          "GUID": "a16957f9-7282-4566-9f96-87fb2e571cc0",
+          "enum": [
+            "Male",
+            "Female"
+          ]
+        },
+        {
+          "name": "breed",
+          "hackoladeMeta": {},
+          "isActivated": true,
+          "type": "document",
+          "properties": [
+            {
+              "name": "_id",
+              "hackoladeMeta": {},
+              "isActivated": true,
+              "type": "objectId",
+              "GUID": "295bb0d7-0f62-4c32-a103-7998602d7a43",
+              "error": {},
+              "relationshipType": "Foreign Key",
+              "foreignCollection": "34a9775f-664c-4cda-a306-c4eb496d50e2",
+              "foreignField": [
+                "34a9775f-664c-4cda-a306-c4eb496d50e2",
+                "7614846b-2f0b-4ed0-973e-ee4202136d1c"
+              ],
+              "parentRelationship": "e9ec479a-6758-4ad1-897c-ef750e7cffa5"
+            },
+            {
+              "name": "name",
+              "hackoladeMeta": {},
+              "isActivated": true,
+              "type": "string",
+              "GUID": "6e398e43-153c-4bb4-9f9b-b5bf0366766c",
+              "error": {},
+              "relationshipType": "Foreign Key",
+              "foreignCollection": "34a9775f-664c-4cda-a306-c4eb496d50e2",
+              "foreignField": [
+                "34a9775f-664c-4cda-a306-c4eb496d50e2",
+                "472ca6d1-294c-4357-9933-ac08cf20f728"
+              ],
+              "parentRelationship": "f64329c1-d7d7-4bee-ae41-812b111dc31b"
+            }
+          ],
+          "additionalProperties": false,
+          "error": {},
+          "GUID": "a2e87394-72d9-4cc6-ae07-7f2110a0309d"
+        },
+        {
+          "name": "type",
+          "hackoladeMeta": {},
+          "isActivated": true,
+          "type": "document",
+          "properties": [
+            {
+              "name": "_id",
+              "hackoladeMeta": {},
+              "isActivated": true,
+              "type": "objectId",
+              "GUID": "da4fc634-6dfb-47b7-abd5-95fb116bea8a",
+              "error": {
+                "name": false,
+                "code": false
+              },
+              "relationshipType": "Foreign Key",
+              "foreignCollection": "5e4837a2-4307-4ffb-be3a-c27ada7275dd",
+              "foreignField": [
+                "5e4837a2-4307-4ffb-be3a-c27ada7275dd",
+                "fecd1850-6f91-4363-a66e-d5ca7bc80bdc"
+              ],
+              "parentRelationship": "3b1dce34-2a7d-4726-b8d9-d34cbd21cf60"
+            },
+            {
+              "hackoladeMeta": {},
+              "isActivated": true,
+              "type": "string",
+              "GUID": "25b77d5e-56b1-4fd3-bcff-dde1d9b971bf",
+              "name": "name",
+              "error": {},
+              "relationshipType": "Foreign Key",
+              "foreignCollection": "5e4837a2-4307-4ffb-be3a-c27ada7275dd",
+              "foreignField": [
+                "5e4837a2-4307-4ffb-be3a-c27ada7275dd",
+                "5ba1d3d0-5d96-4b6f-9be8-8ade0e84ae91"
+              ],
+              "parentRelationship": "af507fa6-3ce5-47d1-85d6-147aa1a0eee1"
+            }
+          ],
+          "additionalProperties": false,
+          "error": {
+            "name": false,
+            "code": false
+          },
+          "GUID": "8c08be04-6ded-481d-8d73-f28bc66ff600"
+        },
+        {
+          "name": "dob",
+          "hackoladeMeta": {},
+          "isActivated": true,
+          "type": "date",
+          "primaryKey": false,
+          "GUID": "9a6f3799-541f-4f0d-bafa-b27dc24967a9",
+          "now": true,
+          "error": {}
+        }
+      ],
+      "definitions": {
+        "type": "definitions",
+        "properties": [],
+        "GUID": "d4605a50-b896-4694-b81e-4166fa26380d"
+      },
+      "isActivated": true,
+      "additionalProperties": false,
+      "validationLevel": "Off",
+      "validationAction": "Warn",
+      "storageEngineName": "WiredTiger",
+      "collectionUsers": [],
+      "indexes": [],
+      "collation": {},
+      "sharding": {
+        "unique": true,
+        "collation": "null"
+      },
+      "GUID": "3a9f654d-9487-44f8-9313-ed6ccbb4b00f",
+      "bucketId": "5f8e386a-1c73-43b3-bf0b-06ee623c4581",
+      "hackoladeMeta": {
+        "namingConvention": "",
+        "validationErrors": {}
+      }
+    },
+    {
+      "collectionName": "Pet_Types",
+      "type": "object",
+      "properties": [
+        {
+          "name": "_id",
+          "hackoladeMeta": {},
+          "isActivated": true,
+          "type": "objectId",
+          "error": {
+            "name": false,
+            "code": false
+          },
+          "GUID": "fecd1850-6f91-4363-a66e-d5ca7bc80bdc",
+          "childRelationships": [
+            "3b1dce34-2a7d-4726-b8d9-d34cbd21cf60"
+          ]
+        },
+        {
+          "name": "name",
+          "hackoladeMeta": {},
+          "isActivated": true,
+          "type": "string",
+          "GUID": "5ba1d3d0-5d96-4b6f-9be8-8ade0e84ae91",
+          "error": {
+            "name": false,
+            "code": false
+          },
+          "childRelationships": [
+            "af507fa6-3ce5-47d1-85d6-147aa1a0eee1"
+          ]
+        }
+      ],
+      "definitions": {
+        "type": "definitions",
+        "properties": [],
+        "GUID": "bd469d2d-7e0a-4b8f-8e38-4566003a4ffb"
+      },
+      "isActivated": true,
+      "additionalProperties": false,
+      "validationLevel": "Off",
+      "validationAction": "Warn",
+      "storageEngineName": "WiredTiger",
+      "collectionUsers": [],
+      "indexes": [],
+      "collation": {},
+      "sharding": {
+        "unique": true,
+        "collation": "null"
+      },
+      "GUID": "5e4837a2-4307-4ffb-be3a-c27ada7275dd",
+      "bucketId": "5f8e386a-1c73-43b3-bf0b-06ee623c4581",
+      "hackoladeMeta": {
+        "validationErrors": {}
+      }
+    },
+    {
+      "collectionName": "Pet_Breeds",
+      "type": "object",
+      "properties": [
+        {
+          "name": "_id",
+          "hackoladeMeta": {},
+          "isActivated": true,
+          "type": "objectId",
+          "error": {
+            "name": false,
+            "code": false
+          },
+          "GUID": "7614846b-2f0b-4ed0-973e-ee4202136d1c",
+          "childRelationships": [
+            "e9ec479a-6758-4ad1-897c-ef750e7cffa5"
+          ]
+        },
+        {
+          "name": "name",
+          "hackoladeMeta": {},
+          "isActivated": true,
+          "type": "string",
+          "GUID": "472ca6d1-294c-4357-9933-ac08cf20f728",
+          "error": {
+            "name": false,
+            "code": false
+          },
+          "childRelationships": [
+            "f64329c1-d7d7-4bee-ae41-812b111dc31b"
+          ]
+        }
+      ],
+      "definitions": {
+        "type": "definitions",
+        "properties": [],
+        "GUID": "c6da4e5b-4d95-46f9-853f-c6deed97bb19"
+      },
+      "isActivated": true,
+      "additionalProperties": false,
+      "validationLevel": "Off",
+      "validationAction": "Warn",
+      "storageEngineName": "WiredTiger",
+      "collectionUsers": [],
+      "indexes": [],
+      "collation": {},
+      "sharding": {
+        "unique": true,
+        "collation": "null"
+      },
+      "GUID": "34a9775f-664c-4cda-a306-c4eb496d50e2",
+      "bucketId": "5f8e386a-1c73-43b3-bf0b-06ee623c4581",
+      "hackoladeMeta": {
+        "namingConvention": "",
+        "validationErrors": {}
+      }
+    }
+  ],
+  "buckets": [
+    {
+      "name": "Happy_Tails",
+      "type": "bucket",
+      "collectionIds": [
+        "f89ca160-1225-4dd7-9929-2f16fe13ba65",
+        "3a9f654d-9487-44f8-9313-ed6ccbb4b00f",
+        "5e4837a2-4307-4ffb-be3a-c27ada7275dd",
+        "34a9775f-664c-4cda-a306-c4eb496d50e2"
+      ],
+      "backgroundColor": {
+        "r": 129,
+        "g": 212,
+        "b": 250,
+        "a": 1
+      },
+      "show": true,
+      "isActivated": true,
+      "GUID": "5f8e386a-1c73-43b3-bf0b-06ee623c4581",
+      "hackoladeMeta": {
+        "validationErrors": {}
+      }
+    }
+  ],
+  "views": [],
+  "relationships": [
+    {
+      "name": "fk_Pet_Types._id_to_Pets.type._id",
+      "relationshipType": "Foreign Key",
+      "parentField": [
+        [
+          "5e4837a2-4307-4ffb-be3a-c27ada7275dd",
+          "fecd1850-6f91-4363-a66e-d5ca7bc80bdc"
+        ]
+      ],
+      "parentCardinality": "1",
+      "childField": [
+        [
+          "3a9f654d-9487-44f8-9313-ed6ccbb4b00f",
+          "8c08be04-6ded-481d-8d73-f28bc66ff600",
+          "da4fc634-6dfb-47b7-abd5-95fb116bea8a"
+        ]
+      ],
+      "isActivated": true,
+      "childCardinality": "0..n",
+      "parentCollection": "5e4837a2-4307-4ffb-be3a-c27ada7275dd",
+      "childCollection": "3a9f654d-9487-44f8-9313-ed6ccbb4b00f",
+      "GUID": "3b1dce34-2a7d-4726-b8d9-d34cbd21cf60",
+      "hackoladeMeta": {
+        "validationErrors": {}
+      },
+      "hackoladeStyles": {
+        "GUID": "07fba8b5-28f4-4e07-9af0-72bfa52b194c",
+        "autoPositioning": true,
+        "type": "Orthogonal",
+        "thickness": 2,
+        "color": "#79c4ff",
+        "dataType": "",
+        "shape": [
+          {
+            "x": 2239.333334287008,
+            "y": 1011.1999990463257
+          },
+          {
+            "x": 2333.6666676203413,
+            "y": 1011.1999990463257
+          },
+          {
+            "x": 2333.6666676203413,
+            "y": 1044
+          },
+          {
+            "x": 2428.0000009536743,
+            "y": 1044
+          }
+        ],
+        "sides": [
+          "right",
+          "left"
+        ]
+      }
+    },
+    {
+      "name": "fk_Pet_Types.name_to_Pets.type.name",
+      "relationshipType": "Foreign Key",
+      "parentField": [
+        [
+          "5e4837a2-4307-4ffb-be3a-c27ada7275dd",
+          "5ba1d3d0-5d96-4b6f-9be8-8ade0e84ae91"
+        ]
+      ],
+      "parentCardinality": "1",
+      "childField": [
+        [
+          "3a9f654d-9487-44f8-9313-ed6ccbb4b00f",
+          "8c08be04-6ded-481d-8d73-f28bc66ff600",
+          "25b77d5e-56b1-4fd3-bcff-dde1d9b971bf"
+        ]
+      ],
+      "isActivated": true,
+      "childCardinality": "0..n",
+      "parentCollection": "5e4837a2-4307-4ffb-be3a-c27ada7275dd",
+      "childCollection": "3a9f654d-9487-44f8-9313-ed6ccbb4b00f",
+      "GUID": "af507fa6-3ce5-47d1-85d6-147aa1a0eee1",
+      "hackoladeMeta": {
+        "validationErrors": {}
+      },
+      "hackoladeStyles": {
+        "GUID": "e62fc502-e5f3-4b57-b2b7-44bb91cc5e28",
+        "autoPositioning": true,
+        "type": "Orthogonal",
+        "thickness": 2,
+        "color": "#79c4ff",
+        "dataType": "",
+        "shape": [
+          {
+            "x": 2239.333334287008,
+            "y": 1053.5999990463256
+          },
+          {
+            "x": 2333.6666676203413,
+            "y": 1053.5999990463256
+          },
+          {
+            "x": 2333.6666676203413,
+            "y": 1069
+          },
+          {
+            "x": 2428.0000009536743,
+            "y": 1069
+          }
+        ],
+        "sides": [
+          "right",
+          "left"
+        ]
+      }
+    },
+    {
+      "name": "fk_Pet_Breed._id_to_Pets.breed._id",
+      "relationshipType": "Foreign Key",
+      "parentField": [
+        [
+          "34a9775f-664c-4cda-a306-c4eb496d50e2",
+          "7614846b-2f0b-4ed0-973e-ee4202136d1c"
+        ]
+      ],
+      "parentCardinality": "1",
+      "childField": [
+        [
+          "3a9f654d-9487-44f8-9313-ed6ccbb4b00f",
+          "a2e87394-72d9-4cc6-ae07-7f2110a0309d",
+          "295bb0d7-0f62-4c32-a103-7998602d7a43"
+        ]
+      ],
+      "isActivated": true,
+      "childCardinality": "0..n",
+      "parentCollection": "34a9775f-664c-4cda-a306-c4eb496d50e2",
+      "childCollection": "3a9f654d-9487-44f8-9313-ed6ccbb4b00f",
+      "GUID": "e9ec479a-6758-4ad1-897c-ef750e7cffa5",
+      "hackoladeMeta": {
+        "validationErrors": {}
+      },
+      "hackoladeStyles": {
+        "GUID": "ac1735d1-3e2a-4a07-8fa4-78bfe191b1b7",
+        "autoPositioning": true,
+        "type": "Orthogonal",
+        "thickness": 2,
+        "color": "#79c4ff",
+        "dataType": "",
+        "shape": [
+          {
+            "x": 2239.333334287008,
+            "y": 926.3999990463257
+          },
+          {
+            "x": 2328.166667143504,
+            "y": 926.3999990463257
+          },
+          {
+            "x": 2328.166667143504,
+            "y": 947.3333333333334
+          },
+          {
+            "x": 2417,
+            "y": 947.3333333333334
+          }
+        ],
+        "sides": [
+          "right",
+          "left"
+        ]
+      }
+    },
+    {
+      "name": "fk_Pet_Breed.name_to_Pets.breed.name",
+      "relationshipType": "Foreign Key",
+      "parentField": [
+        [
+          "34a9775f-664c-4cda-a306-c4eb496d50e2",
+          "472ca6d1-294c-4357-9933-ac08cf20f728"
+        ]
+      ],
+      "parentCardinality": "1",
+      "childField": [
+        [
+          "3a9f654d-9487-44f8-9313-ed6ccbb4b00f",
+          "a2e87394-72d9-4cc6-ae07-7f2110a0309d",
+          "6e398e43-153c-4bb4-9f9b-b5bf0366766c"
+        ]
+      ],
+      "isActivated": true,
+      "childCardinality": "0..n",
+      "parentCollection": "34a9775f-664c-4cda-a306-c4eb496d50e2",
+      "childCollection": "3a9f654d-9487-44f8-9313-ed6ccbb4b00f",
+      "GUID": "f64329c1-d7d7-4bee-ae41-812b111dc31b",
+      "hackoladeMeta": {
+        "validationErrors": {}
+      },
+      "hackoladeStyles": {
+        "GUID": "e46864cd-251a-48c3-9e11-63ed16f3593f",
+        "autoPositioning": true,
+        "type": "Orthogonal",
+        "thickness": 2,
+        "color": "#79c4ff",
+        "dataType": "",
+        "shape": [
+          {
+            "x": 2239.333334287008,
+            "y": 968.7999990463256
+          },
+          {
+            "x": 2328.166667143504,
+            "y": 968.7999990463256
+          },
+          {
+            "x": 2328.166667143504,
+            "y": 972.6666666666666
+          },
+          {
+            "x": 2417,
+            "y": 972.6666666666666
+          }
+        ],
+        "sides": [
+          "right",
+          "left"
+        ]
+      }
+    },
+    {
+      "name": "fk_Pets._id_to_Users.my _pets.[0].pet_id",
+      "relationshipType": "Foreign Key",
+      "parentField": [
+        [
+          "3a9f654d-9487-44f8-9313-ed6ccbb4b00f",
+          "785fcda9-09e7-4c94-bbbb-780210e9865a"
+        ]
+      ],
+      "parentCardinality": "n",
+      "childField": [
+        [
+          "f89ca160-1225-4dd7-9929-2f16fe13ba65",
+          "ce657094-3262-4625-a8c9-5489b7de4196",
+          "01c9c9f0-ca54-4a20-a11e-399f1fe1c994",
+          "f7c4bb24-37de-434f-bfe7-c15b93d1b693"
+        ]
+      ],
+      "isActivated": true,
+      "childCardinality": "1",
+      "parentCollection": "3a9f654d-9487-44f8-9313-ed6ccbb4b00f",
+      "childCollection": "f89ca160-1225-4dd7-9929-2f16fe13ba65",
+      "GUID": "404a0fc5-0c8e-4799-92bc-5132f910cd80",
+      "hackoladeMeta": {
+        "validationErrors": {}
+      },
+      "hackoladeStyles": {
+        "GUID": "3893dfe4-74c6-4122-ab14-31ca7e123f8d",
+        "autoPositioning": true,
+        "type": "Orthogonal",
+        "thickness": 2,
+        "color": "#79c4ff",
+        "dataType": "",
+        "shape": [
+          {
+            "x": 1989,
+            "y": 964.6666666666666
+          },
+          {
+            "x": 2014.166667143504,
+            "y": 964.6666666666666
+          },
+          {
+            "x": 2014.166667143504,
+            "y": 954.6666657129923
+          },
+          {
+            "x": 2039.3333342870078,
+            "y": 954.6666657129923
+          }
+        ],
+        "sides": [
+          "right",
+          "left"
+        ]
+      }
+    },
+    {
+      "name": "fk_Pets.name_to_Users.my _pets.[0]. name",
+      "relationshipType": "Foreign Key",
+      "parentField": [
+        [
+          "3a9f654d-9487-44f8-9313-ed6ccbb4b00f",
+          "bb87279c-338a-4159-b446-dd5199aedff7"
+        ]
+      ],
+      "parentCardinality": "n",
+      "childField": [
+        [
+          "f89ca160-1225-4dd7-9929-2f16fe13ba65",
+          "ce657094-3262-4625-a8c9-5489b7de4196",
+          "01c9c9f0-ca54-4a20-a11e-399f1fe1c994",
+          "6041bb1a-6055-48bd-bb5a-db5b9cfee1b1"
+        ]
+      ],
+      "isActivated": true,
+      "childCardinality": "1",
+      "parentCollection": "3a9f654d-9487-44f8-9313-ed6ccbb4b00f",
+      "childCollection": "f89ca160-1225-4dd7-9929-2f16fe13ba65",
+      "GUID": "b1457208-7454-4eb7-91cc-e5c4c07f470e",
+      "hackoladeMeta": {
+        "validationErrors": {}
+      },
+      "hackoladeStyles": {
+        "GUID": "77746c27-3711-4b0a-8d82-609d136332a0",
+        "autoPositioning": true,
+        "type": "Orthogonal",
+        "thickness": 2,
+        "color": "#79c4ff",
+        "dataType": "",
+        "shape": [
+          {
+            "x": 1989,
+            "y": 1053.3333333333333
+          },
+          {
+            "x": 2014.166667143504,
+            "y": 1053.3333333333333
+          },
+          {
+            "x": 2014.166667143504,
+            "y": 1025.333332379659
+          },
+          {
+            "x": 2039.3333342870078,
+            "y": 1025.333332379659
+          }
+        ],
+        "sides": [
+          "right",
+          "left"
+        ]
+      }
+    }
+  ],
+  "users": [],
+  "diagramViews": [
+    {
+      "GUID": "24c2e749-04ba-4d5d-92a1-2781c7b18711",
+      "name": "jhjjj",
+      "buckets": [
+        "5f8e386a-1c73-43b3-bf0b-06ee623c4581"
+      ],
+      "comments": "",
+      "description": "",
+      "entities": [
+        "Databases",
+        "5f8e386a-1c73-43b3-bf0b-06ee623c4581",
+        "f89ca160-1225-4dd7-9929-2f16fe13ba65",
+        "3a9f654d-9487-44f8-9313-ed6ccbb4b00f",
+        "5e4837a2-4307-4ffb-be3a-c27ada7275dd",
+        "34a9775f-664c-4cda-a306-c4eb496d50e2"
+      ]
+    }
+  ],
+  "idToNameHashTable": {
+    "5f8e386a-1c73-43b3-bf0b-06ee623c4581": "Happy_Tails",
+    "f89ca160-1225-4dd7-9929-2f16fe13ba65": "Users",
+    "0682b3c5-cb23-4cfb-9987-45935d80bcf8": "email",
+    "ca989f50-0334-4b4a-9157-014c2e93f918": "password_hash",
+    "c105af8a-152e-42b0-9d26-22a2137d3402": "roles",
+    "0efa531e-ecdd-4023-a0d2-406aedc03bb9": "_id",
+    "e3ae4304-eb84-4e17-9c4c-c1da08609561": "address",
+    "9a85de9c-7110-4b45-80bf-e9406afcc0f0": "pet_preferences",
+    "3a9f654d-9487-44f8-9313-ed6ccbb4b00f": "Pets",
+    "785fcda9-09e7-4c94-bbbb-780210e9865a": "_id",
+    "bb87279c-338a-4159-b446-dd5199aedff7": "name",
+    "a16957f9-7282-4566-9f96-87fb2e571cc0": "gender",
+    "a2e87394-72d9-4cc6-ae07-7f2110a0309d": "breed",
+    "8c08be04-6ded-481d-8d73-f28bc66ff600": "type",
+    "9a6f3799-541f-4f0d-bafa-b27dc24967a9": "dob",
+    "5e4837a2-4307-4ffb-be3a-c27ada7275dd": "Pet_Types",
+    "fecd1850-6f91-4363-a66e-d5ca7bc80bdc": "_id",
+    "5ba1d3d0-5d96-4b6f-9be8-8ade0e84ae91": "name",
+    "ba6c5128-e46e-4cbe-8d1b-2b48bc9716a5": "New Field",
+    "25b77d5e-56b1-4fd3-bcff-dde1d9b971bf": "name",
+    "da4fc634-6dfb-47b7-abd5-95fb116bea8a": "_id",
+    "048764f5-0c37-4881-b222-68b848fae254": "joined_on",
+    "3b1dce34-2a7d-4726-b8d9-d34cbd21cf60": "fk_Pet_Types._id_to_Pets.type._id",
+    "af507fa6-3ce5-47d1-85d6-147aa1a0eee1": "fk_Pet_Types.name_to_Pets.type.name",
+    "2a959f1e-f60f-4f3f-b872-c10a6ac5390b": "New view",
+    "34a9775f-664c-4cda-a306-c4eb496d50e2": "Pet_Breeds",
+    "7614846b-2f0b-4ed0-973e-ee4202136d1c": "_id",
+    "472ca6d1-294c-4357-9933-ac08cf20f728": "name",
+    "295bb0d7-0f62-4c32-a103-7998602d7a43": "_id",
+    "6e398e43-153c-4bb4-9f9b-b5bf0366766c": "name",
+    "e9ec479a-6758-4ad1-897c-ef750e7cffa5": "fk_Pet_Breed._id_to_Pets.breed._id",
+    "f64329c1-d7d7-4bee-ae41-812b111dc31b": "fk_Pet_Breed.name_to_Pets.breed.name",
+    "24c2e749-04ba-4d5d-92a1-2781c7b18711": "jhjjj",
+    "ce657094-3262-4625-a8c9-5489b7de4196": "my_pets",
+    "f7c4bb24-37de-434f-bfe7-c15b93d1b693": "pet_id",
+    "6041bb1a-6055-48bd-bb5a-db5b9cfee1b1": " name",
+    "404a0fc5-0c8e-4799-92bc-5132f910cd80": "fk_Pets._id_to_Users.my _pets.[0].pet_id",
+    "b1457208-7454-4eb7-91cc-e5c4c07f470e": "fk_Pets.name_to_Users.my _pets.[0]. name",
+    "baaacb98-b8a8-4101-80cf-76aff903b349": "is_admin",
+    "6b93ccab-bde2-4d92-922a-a65485753c1a": "name"
+  },
+  "definitions": {
+    "type": "definitions",
+    "properties": [],
+    "GUID": "f92f0913-fd23-42d2-8e04-55210a651c4d"
+  },
+  "polyglotDefinitions": {
+    "type": "polyglotDefinitions",
+    "properties": [],
+    "GUID": "fbc3909c-8a9b-40c7-a173-277bc57c3337"
+  },
+  "externalDefinitions": {
+    "type": "externalDefinitions",
+    "properties": [],
+    "GUID": "88f1419c-3115-4d7f-af82-7a29c485f38e"
+  },
+  "sources": [],
+  "decorativeSymbols": [],
+  "dbVersion": "v7.x",
+  "dbVendor": "MongoDB",
+  "appTarget": "MONGODB",
+  "creationTS": "2025-09-24T05:30:19.912Z",
+  "GUID": "40006cd4-775f-40a7-8924-83be56be62fe",
+  "isLineageEnabled": false,
+  "lastModifTS": "2025-09-26T04:05:11.519Z",
+  "persistenceSchemaVersion": "8",
+  "isCreatedByPlugin": true,
+  "pluginInformation": {
+    "pluginEngineVersion": "1.0.0"
+  },
+  "applicationInformation": {
+    "version": "8.4.3"
+  },
+  "hackoladeMeta": {
+    "validationErrors": {}
+  },
+  "settings": {
+    "centralPane": {
+      "dbLevel": {
+        "erd": [
+          {
+            "GUID": "f89ca160-1225-4dd7-9929-2f16fe13ba65",
+            "x": 1771,
+            "y": 876,
+            "width": 218,
+            "height": 266,
+            "color": {}
+          },
+          {
+            "GUID": "3a9f654d-9487-44f8-9313-ed6ccbb4b00f",
+            "x": 2039.3333342870078,
+            "y": 883.9999990463257,
+            "width": 200,
+            "height": 212,
+            "color": {}
+          },
+          {
+            "GUID": "5e4837a2-4307-4ffb-be3a-c27ada7275dd",
+            "x": 2428.0000009536743,
+            "y": 1019,
+            "width": 212,
+            "height": 75,
+            "color": {
+              "hex": "#ef9a9a"
+            }
+          },
+          {
+            "GUID": "34a9775f-664c-4cda-a306-c4eb496d50e2",
+            "x": 2417,
+            "y": 922,
+            "width": 204,
+            "height": 76,
+            "color": {
+              "hex": "#a5d6a7"
+            }
+          }
+        ],
+        "erdDefinitions": {
+          "erd": [],
+          "rootPath": [],
+          "entities": [],
+          "decorativeSymbols": []
+        },
+        "buckets": [
+          {
+            "x": 1707,
+            "y": 812,
+            "GUID": "5f8e386a-1c73-43b3-bf0b-06ee623c4581"
+          }
+        ],
+        "collapsedNodes": [],
+        "activeRelationship": "",
+        "activeRelationshipFields": {
+          "childField": [],
+          "parentField": []
+        },
+        "selectedCollections": [],
+        "displayColorPicker": false,
+        "graphView": {
+          "erd": [],
+          "buckets": [],
+          "decorativeSymbols": [],
+          "forceLayout": true,
+          "defaultLinkLength": 300
+        },
+        "diagramViews": [
+          {
+            "GUID": "24c2e749-04ba-4d5d-92a1-2781c7b18711",
+            "entities": [
+              {
+                "GUID": "f89ca160-1225-4dd7-9929-2f16fe13ba65",
+                "x": 1080,
+                "y": 1119,
+                "width": 219,
+                "height": 266,
+                "color": {}
+              },
+              {
+                "GUID": "3a9f654d-9487-44f8-9313-ed6ccbb4b00f",
+                "x": 1351.3333342870078,
+                "y": 1117.9999990463257,
+                "width": 172,
+                "height": 209,
+                "color": {}
+              },
+              {
+                "GUID": "5e4837a2-4307-4ffb-be3a-c27ada7275dd",
+                "x": 1717.0000009536743,
+                "y": 1249,
+                "width": 179,
+                "height": 65,
+                "color": {
+                  "hex": "#ef9a9a"
+                }
+              },
+              {
+                "GUID": "34a9775f-664c-4cda-a306-c4eb496d50e2",
+                "x": 1690,
+                "y": 1145.0000009536743,
+                "width": 186,
+                "height": 65,
+                "color": {
+                  "hex": "#a5d6a7"
+                }
+              }
+            ],
+            "buckets": [
+              {
+                "x": 1016,
+                "y": 1053.9999990463257,
+                "GUID": "5f8e386a-1c73-43b3-bf0b-06ee623c4581"
+              }
+            ],
+            "graphView": {
+              "erd": [],
+              "buckets": [],
+              "decorativeSymbols": [],
+              "forceLayout": true,
+              "defaultLinkLength": 300
+            },
+            "displayOptions": {},
+            "relationships": [
+              {
+                "GUID": "3b1dce34-2a7d-4726-b8d9-d34cbd21cf60",
+                "autoPositioning": true,
+                "sides": [
+                  "right",
+                  "left"
+                ],
+                "shape": [
+                  {
+                    "x": 1523.3333342870078,
+                    "y": 1243.3999990463258
+                  },
+                  {
+                    "x": 1620.166667620341,
+                    "y": 1243.3999990463258
+                  },
+                  {
+                    "x": 1620.166667620341,
+                    "y": 1270.6666666666667
+                  },
+                  {
+                    "x": 1717.0000009536743,
+                    "y": 1270.6666666666667
+                  }
+                ]
+              },
+              {
+                "GUID": "af507fa6-3ce5-47d1-85d6-147aa1a0eee1",
+                "autoPositioning": true,
+                "sides": [
+                  "right",
+                  "left"
+                ],
+                "shape": [
+                  {
+                    "x": 1523.3333342870078,
+                    "y": 1285.1999990463257
+                  },
+                  {
+                    "x": 1620.166667620341,
+                    "y": 1285.1999990463257
+                  },
+                  {
+                    "x": 1620.166667620341,
+                    "y": 1292.3333333333333
+                  },
+                  {
+                    "x": 1717.0000009536743,
+                    "y": 1292.3333333333333
+                  }
+                ]
+              },
+              {
+                "GUID": "e9ec479a-6758-4ad1-897c-ef750e7cffa5",
+                "autoPositioning": true,
+                "sides": [
+                  "right",
+                  "left"
+                ],
+                "shape": [
+                  {
+                    "x": 1523.3333342870078,
+                    "y": 1159.7999990463256
+                  },
+                  {
+                    "x": 1606.666667143504,
+                    "y": 1159.7999990463256
+                  },
+                  {
+                    "x": 1606.666667143504,
+                    "y": 1166.666667620341
+                  },
+                  {
+                    "x": 1690,
+                    "y": 1166.666667620341
+                  }
+                ]
+              },
+              {
+                "GUID": "f64329c1-d7d7-4bee-ae41-812b111dc31b",
+                "autoPositioning": true,
+                "sides": [
+                  "right",
+                  "left"
+                ],
+                "shape": [
+                  {
+                    "x": 1523.3333342870078,
+                    "y": 1201.5999990463256
+                  },
+                  {
+                    "x": 1606.666667143504,
+                    "y": 1201.5999990463256
+                  },
+                  {
+                    "x": 1606.666667143504,
+                    "y": 1188.3333342870076
+                  },
+                  {
+                    "x": 1690,
+                    "y": 1188.3333342870076
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "decorativeSymbols": [],
+        "nestedCollectionsLayout": "horizontal",
+        "options": [
+          {
+            "autoWidth": false,
+            "autoHeight": false,
+            "GUID": "3a9f654d-9487-44f8-9313-ed6ccbb4b00f"
+          },
+          {
+            "autoWidth": false,
+            "autoHeight": false,
+            "GUID": "5e4837a2-4307-4ffb-be3a-c27ada7275dd"
+          },
+          {
+            "autoWidth": false,
+            "autoHeight": false,
+            "GUID": "34a9775f-664c-4cda-a306-c4eb496d50e2"
+          }
+        ],
+        "relationshipUpdateDisabled": false,
+        "displayOptions": {}
+      },
+      "collectionLevel": {},
+      "changed": false
+    },
+    "dtDiagram": {
+      "collapsedNodes": [],
+      "shouldDistributeCollections": false
+    }
+  }
+}
