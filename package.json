@@ -23,5 +23,8 @@
   "main": "app.js",
   "scripts": {
     "test": "nodemon app.js"
+  },
+  "dependencies": {
+    "nodemon": "^3.1.10"
   }
 }
