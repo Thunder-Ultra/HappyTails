@@ -1,0 +1,27 @@
+{
+  "name": "happy_tails",
+  "version": "1.0.0",
+  "description": "A Platform for Pet Adoption",
+  "keywords": [
+    "happy_tails",
+    "pet_management",
+    "nodejs",
+    "express",
+    "react"
+  ],
+  "homepage": "https://github.com/Thunder-Ultra/HappyTails#readme",
+  "bugs": {
+    "url": "https://github.com/Thunder-Ultra/HappyTails/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Thunder-Ultra/HappyTails.git"
+  },
+  "license": "MIT",
+  "author": "Tuchar Das",
+  "type": "commonjs",
+  "main": "app.js",
+  "scripts": {
+    "test": "nodemon app.js"
+  }
+}
