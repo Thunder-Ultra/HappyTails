@@ -1,3 +1,4 @@
+```mermaid
 flowchart TD
 
 %% ====== Start ======
@@ -43,3 +44,4 @@ J --> J3[View Reports]
 H6 --> K([End])
 I5 --> K
 J3 --> K
+```
