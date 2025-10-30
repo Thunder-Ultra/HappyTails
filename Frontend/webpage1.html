@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Happy Tails — Dashboard</title>
+
+  <!-- Tailwind config (use window.tailwind before CDN for consistency) -->
+  <script>
+    window.tailwind = {
+      config: {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              pawPink: '#ff9eb8',
+              pawPeach: '#ffddb3',
+              pawBlue: '#a5d8ff',
+              pawDark: '#1f2937',
+            },
+            boxShadow: {
+              'soft-pink': '0 10px 30px rgba(255,158,184,0.12)',
+              'soft-blue': '0 10px 30px rgba(165,216,255,0.08)'
+            }
+          }
+        }
+      }
+    };
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    /* Entrance animations */
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px);} to { opacity: 1; transform: translateY(0);} }
+    .fade-in-up { animation: fadeInUp .5s ease both; }
+
+    /* subtle float for paw icon */
+    @keyframes floatPaw { 0%,100% { transform: translateY(0);} 50% { transform: translateY(-8px) rotate(6deg);} }
+    .paw-anim { animation: floatPaw 3.2s ease-in-out infinite; }
+
+    /* animated gradient background */
+    .bg-shift { background-size: 200% 200%; animation: bgShift 10s ease infinite; }
+    @keyframes bgShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+    /* card hover lift */
+    .card-hover:hover { transform: translateY(-8px) scale(1.01); box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
+
+    /* glow for buttons */
+    .glow-light:hover { box-shadow: 0 8px 28px rgba(255,158,184,0.12); }
+    .dark .glow-light:hover { box-shadow: 0 8px 28px rgba(165,216,255,0.10); }
+
+    /* smooth transition for theme */
+    html, body, section, div, button, input { transition: background-color .35s ease, color .35s ease, transform .18s ease; }
+
+    /* modal backdrop */
+    .modal-backdrop { background: rgba(0,0,0,0.55); }
+
+    /* small helpers */
+    .card-img { height: 160px; object-fit: cover; width: 100%; }
+  </style>
+</head>
+
+<body class="min-h-screen bg-shift bg-gradient-to-br from-pawPeach via-white to-pawPink 
+dark:from-gray-900 dark:via-gray-800 dark:to-pawDark 
+text-gray-800 dark:text-gray-100 transition-all duration-500">
+
+
+  <!-- Top header -->
+  <header class="sticky top-0 z-40 backdrop-blur-md bg-white/60 dark:bg-gray-900/60 border-b border-white/30 dark:border-gray-700">
+    <div class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <div class="flex items-center gap-3">
+          <div class="p-2 rounded-md bg-white/80 dark:bg-gray-800 shadow">
+            <img src="https://cdn-icons-png.flaticon.com/512/616/616408.png" alt="paw" class="w-7 h-7" />
+          </div>
+          <div>
+            <div class="font-extrabold text-lg">Happy <span class="text-pawPink dark:text-pawBlue">Tails</span></div>
+            <div class="text-xs text-gray-600 dark:text-gray-300">Find your next furry friend</div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <!-- Search -->
+          <div class="relative">
+            <input id="search" type="search" placeholder="Search name / breed / type" class="pl-3 pr-10 py-2 rounded-full w-80 border focus:ring-2 focus:ring-pawPink dark:focus:ring-pawBlue dark:bg-gray-800 dark:border-gray-700" />
+            <button id="clearSearch" title="Clear" class="absolute right-1 top-1.5 text-gray-500 hover:text-gray-700 dark:hover:text-gray-200 px-2">✕</button>
+          </div>
+
+          <!-- Filter button -->
+          <div class="relative">
+            <button id="filterToggle" class="px-3 py-2 rounded-full bg-white/80 dark:bg-gray-800 border border-white/20 dark:border-gray-700 shadow hover:scale-105 transition transform">Filters ▾</button>
+
+            <!-- Filter dropdown (hidden until toggle) -->
+            <div id="filterDropdown" class="hidden absolute right-0 mt-3 w-72 bg-white/90 dark:bg-gray-800/80 backdrop-blur rounded-xl p-4 shadow-xl border border-white/20 dark:border-gray-700 z-50">
+              <div class="mb-3 font-semibold">Filter results</div>
+
+              <!-- Type checkboxes -->
+              <div class="mb-3">
+                <div class="text-sm font-medium mb-1">Type</div>
+                <div class="flex gap-2 flex-wrap">
+                  <label class="inline-flex items-center gap-2"><input type="checkbox" class="filter-type" value="Dog" /> Dog</label>
+                  <label class="inline-flex items-center gap-2"><input type="checkbox" class="filter-type" value="Cat" /> Cat</label>
+                </div>
+              </div>
+
+              <!-- Breed (checkboxes) -->
+              <div class="mb-3">
+                <div class="text-sm font-medium mb-1">Breeds</div>
+                <div id="breedCheckboxes" class="grid grid-cols-2 gap-2 text-sm max-h-36 overflow-auto pr-2"></div>
+              </div>
+
+              <!-- Location -->
+              <div class="mb-4">
+                <div class="text-sm font-medium mb-1">Locations</div>
+                <div id="locCheckboxes" class="grid grid-cols-2 gap-2 text-sm max-h-36 overflow-auto pr-2"></div>
+              </div>
+
+              <div class="flex gap-2">
+                <button id="applyFilters" class="flex-1 px-3 py-2 rounded-lg bg-pawPink text-white glow-light">Apply</button>
+                <button id="resetFilters" class="flex-1 px-3 py-2 rounded-lg bg-white/80 dark:bg-gray-700 border">Reset</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Theme toggle -->
+          <button id="themeToggle" class="p-2 rounded-full bg-white/80 dark:bg-gray-700 shadow hover:scale-105 transition transform" aria-label="Toggle theme">🌞</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main layout -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex items-center justify-between mb-4">
+      <div class="text-sm text-gray-700 dark:text-gray-300">Showing <span id="count">0</span> pets</div>
+      <div class="flex gap-2 items-center">
+        <button id="resetView" class="px-3 py-1 rounded-full bg-white/80 dark:bg-gray-700 border">Reset View</button>
+      </div>
+    </div>
+
+    <!-- Grid -->
+    <div id="grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+
+    <!-- Load more placeholder -->
+    <div class="flex justify-center mt-8">
+      <button id="loadMore" class="px-5 py-2 rounded-lg bg-white/80 dark:bg-gray-700 border shadow hover:scale-105 transition">Load more</button>
+    </div>
+  </main>
+
+  <!-- Modal -->
+  <div id="modal" class="fixed inset-0 z-50 hidden items-center justify-center">
+    <div class="absolute inset-0 modal-backdrop" onclick="closeModal()"></div>
+    <div class="relative max-w-3xl w-full mx-4 bg-white/95 dark:bg-gray-900/95 rounded-2xl shadow-2xl overflow-hidden">
+      <div class="md:flex">
+        <div class="md:w-1/2">
+          <img id="modalImg" src="" class="w-full h-72 object-cover" alt="pet" />
+        </div>
+        <div class="p-6 md:w-1/2">
+          <h3 id="modalName" class="text-2xl font-bold mb-1"></h3>
+          <p id="modalBreed" class="text-sm text-gray-600 dark:text-gray-300 mb-2"></p>
+          <p id="modalType" class="mb-2"></p>
+          <p id="modalLocation" class="text-sm mb-4"></p>
+          <p id="modalDesc" class="text-gray-700 dark:text-gray-300 mb-6"></p>
+          <div class="flex gap-3">
+            <button class="px-4 py-2 bg-pawPink text-white rounded-lg">Contact</button>
+            <button class="px-4 py-2 bg-white/80 dark:bg-gray-700 rounded-lg border" onclick="closeModal()">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* -------------------------
+   DUMMY DATA (20 items)
+   Replace with server response later via fetchPets()
+   ------------------------- */
+const pets = [
+  { id:1, type:'Dog', name:'Raju', breed:'Labrador', location:'Mumbai', img:'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=1000&q=80', desc:'Playful Labrador who loves water and fetch.'},
+  { id:2, type:'Cat', name:'Gulab', breed:'Persian', location:'Delhi', img:'https://images.unsplash.com/photo-1518791841217-8f162f1e1131?w=1000&q=80', desc:'Fluffy Persian with calm temperament.'},
+  { id:3, type:'Dog', name:'Sheru', breed:'German Shepherd', location:'Bengaluru', img:'https://imgs.search.brave.com/gbpuU_BoJSif3yOMjJ1zQ9RUCvX8KIfIQGDumRLg81M/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9jZG4u/cGl4YWJheS5jb20v/cGhvdG8vMjAyMS8x/MC8wMS8xOC81My9j/b3JnaS02NjczMzQz/XzY0MC5qcGc', desc:'Loyal and protective, great for families.'},
+  { id:4, type:'Cat', name:'Moti', breed:'Bengal', location:'Kolkata', img:'https://images.unsplash.com/photo-1517423440428-a5a00ad493e8?w=1000&q=80', desc:'Active Bengal who loves to play.'},
+  { id:5, type:'Dog', name:'Simba', breed:'Beagle', location:'Chennai', img:'https://images.unsplash.com/photo-1558788353-f76d92427f16?w=1000&q=80', desc:'Curious Beagle, great with kids.'},
+  { id:6, type:'Cat', name:'Chintu', breed:'Siamese', location:'Hyderabad', img:'https://imgs.search.brave.com/ZV7xdRKSTVkM81fORsjcA4cTWlVQq__StAElhCGBO3U/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9wcmV2/aWV3LnJlZGQuaXQv/Zm91bmQtdGhpcy1j/YXQtb24tc25hcC1p/cy1pdC1yZWFsLWFu/ZC13aGF0cy10aGUt/c291cmNlLXYwLXJt/cHBrMTU3ZHk1ZTEu/anBlZz93aWR0aD0y/MDQ4JmZvcm1hdD1w/anBnJmF1dG89d2Vi/cCZzPTkyZTM0OTI5/NzYzMGZhYWZlZGM4/YWY1NjY1NTIzYmI2/ODJiNDQ2Njk', desc:'Affectionate Siamese who likes company.'},
+  { id:7, type:'Dog', name:'Rani', breed:'Pomeranian', location:'Ahmedabad', img:'https://images.unsplash.com/photo-1603786194282-1c0b4d6b1bd6?w=1000&q=80', desc:'Tiny Pomeranian, great lap dog.'},
+  { id:8, type:'Cat', name:'Tuffy', breed:'Ragdoll', location:'Pune', img:'https://images.unsplash.com/photo-1516979187457-637abb4f9353?w=1000&q=80', desc:'Gentle Ragdoll who loves cuddles.'},
+  { id:9, type:'Dog', name:'Babloo', breed:'Bulldog', location:'Surat', img:'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=1000&q=80', desc:'Chill Bulldog with a friendly personality.'},
+  { id:10, type:'Cat', name:'Motiya', breed:'Maine Coon', location:'Lucknow', img:'https://images.unsplash.com/photo-1526336024174-e58f5cdd8e13?w=1000&q=80', desc:'Large & gentle Maine Coon.'},
+  { id:11, type:'Dog', name:'Kalu', breed:'Doberman', location:'Kanpur', img:'https://images.unsplash.com/photo-1596495578066-0f5e8d8300b6?w=1000&q=80', desc:'Alert Doberman, excellent guard dog.'},
+  { id:12, type:'Cat', name:'Billi', breed:'Sphynx', location:'Agra', img:'https://images.unsplash.com/photo-1543852786-1cf6624b9987?w=1000&q=80', desc:'Unique Sphynx, loves warmth & people.'},
+  { id:13, type:'Dog', name:'Chiku', breed:'Pug', location:'Vadodara', img:'https://images.unsplash.com/photo-1558944351-d8f4c7b6c8b9?w=1000&q=80', desc:'Cute Pug who enjoys short walks.'},
+  { id:14, type:'Cat', name:'Raja', breed:'Russian Blue', location:'Bhopal', img:'https://images.unsplash.com/photo-1595433562696-65c6b3c6c7f5?w=1000&q=80', desc:'Elegant Russian Blue, quiet and smart.'},
+  { id:15, type:'Dog', name:'Bhola', breed:'Labrador', location:'Chandigarh', img:'https://images.unsplash.com/photo-1517423440428-0c2d64d6a3ad?w=1000&q=80', desc:'Friendly labrador great with kids.'},
+  { id:16, type:'Cat', name:'Pihu', breed:'Persian', location:'Dehradun', img:'https://images.unsplash.com/photo-1518791841217-8f162f1e1131?w=1000&q=80', desc:'Fluffy Persian who loves grooming.'},
+  { id:17, type:'Dog', name:'Kittu', breed:'Chihuahua', location:'Noida', img:'https://images.unsplash.com/photo-1546182990-dffeafbe841d?w=1000&q=80', desc:'Tiny and lively Chihuahua.'},
+  { id:18, type:'Cat', name:'Tabby', breed:'Tabby', location:'Indore', img:'https://images.unsplash.com/photo-1525253086316-d0c936c814f8?w=1000&q=80', desc:'Classic tabby, playful and affectionate.'},
+  { id:19, type:'Dog', name:'Ramu', breed:'Indian Pariah', location:'Patna', img:'https://images.unsplash.com/photo-1507149833265-60c372daea22?w=1000&q=80', desc:'Resilient Indian pariah dog, loyal.'},
+  { id:20, type:'Cat', name:'Gattu', breed:'Domestic Short Hair', location:'Jodhpur', img:'https://images.unsplash.com/photo-1518791841217-8f162f1e1131?w=1000&q=80', desc:'Easygoing DSH, good companion.'}
+];
+
+/* -------------------------
+   DOM references & helpers
+   ------------------------- */
+const grid = document.getElementById('grid');
+const countEl = document.getElementById('count');
+const searchInput = document.getElementById('search');
+const clearSearchBtn = document.getElementById('clearSearch');
+const filterToggle = document.getElementById('filterToggle');
+const filterDropdown = document.getElementById('filterDropdown');
+const applyFiltersBtn = document.getElementById('applyFilters');
+const resetFiltersBtn = document.getElementById('resetFilters');
+const breedCheckboxes = document.getElementById('breedCheckboxes');
+const locCheckboxes = document.getElementById('locCheckboxes');
+let currentList = [];
+
+/* -------------------------
+   Populate filter checkboxes dynamically
+   ------------------------- */
+function uniqueSorted(arr) {
+  return Array.from(new Set(arr)).sort((a,b) => a.localeCompare(b));
+}
+function populateFilters(data) {
+  const breeds = uniqueSorted(data.map(p => p.breed));
+  const locs = uniqueSorted(data.map(p => p.location));
+
+  breedCheckboxes.innerHTML = '';
+  locCheckboxes.innerHTML = '';
+
+  breeds.forEach(b => {
+    const id = 'b_' + b.replace(/\s+/g,'_');
+    const wrapper = document.createElement('label');
+    wrapper.className = 'inline-flex items-center gap-2';
+    wrapper.innerHTML = `<input type="checkbox" class="filter-breed" value="${b}" id="${id}"><span class="text-sm">${b}</span>`;
+    breedCheckboxes.appendChild(wrapper);
+  });
+
+  locs.forEach(l => {
+    const id = 'l_' + l.replace(/\s+/g,'_');
+    const wrapper = document.createElement('label');
+    wrapper.className = 'inline-flex items-center gap-2';
+    wrapper.innerHTML = `<input type="checkbox" class="filter-loc" value="${l}" id="${id}"><span class="text-sm">${l}</span>`;
+    locCheckboxes.appendChild(wrapper);
+  });
+}
+
+/* -------------------------
+   Render cards
+   ------------------------- */
+function renderPets(list) {
+  grid.innerHTML = '';
+  list.forEach(p => {
+    const card = document.createElement('article');
+    card.className = 'bg-white/90 dark:bg-gray-800/70 rounded-lg overflow-hidden shadow-md transition-transform transform card-hover fade-in-up';
+    card.innerHTML = `
+      <img src="${p.img}" alt="${p.name}" class="card-img" loading="lazy" />
+      <div class="p-4">
+        <div class="flex justify-between items-start">
+          <div>
+            <h4 class="font-semibold text-lg">${p.name}</h4>
+            <p class="text-sm text-gray-600 dark:text-gray-300">${p.breed} • <span class="capitalize">${p.type}</span></p>
+          </div>
+          <div class="text-xs text-gray-500 dark:text-gray-300">${p.location}</div>
+        </div>
+        <div class="mt-4 flex justify-end">
+          <button class="detail-btn px-3 py-1 rounded-full bg-white/90 dark:bg-gray-700 border hover:bg-pawPink/10 dark:hover:bg-pawBlue/10 transition">Click for more details</button>
+        </div>
+      </div>
+    `;
+    // attach detail
+    card.querySelector('.detail-btn').addEventListener('click', () => openModal(p));
+    grid.appendChild(card);
+  });
+  countEl.textContent = list.length;
+  currentList = list;
+}
+
+/* -------------------------
+   Filtering logic (multi-checkbox + search)
+   ------------------------- */
+function getSelectedValues(selector) {
+  return Array.from(document.querySelectorAll(selector + ':checked')).map(n => n.value);
+}
+
+function filterPets() {
+  const q = (searchInput.value || '').trim().toLowerCase();
+  const types = getSelectedValues('.filter-type'); // Dog, Cat
+  const breeds = getSelectedValues('.filter-breed');
+  const locs = getSelectedValues('.filter-loc');
+
+  let out = pets.filter(p => {
+    // search
+    if (q) {
+      const hay = (p.name + ' ' + p.breed + ' ' + p.type + ' ' + p.location).toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    // type filters
+    if (types.length && !types.includes(p.type)) return false;
+    // breed filters
+    if (breeds.length && !breeds.includes(p.breed)) return false;
+    // location filters
+    if (locs.length && !locs.includes(p.location)) return false;
+
+    return true;
+  });
+
+  renderPets(out);
+}
+
+/* -------------------------
+   Modal
+   ------------------------- */
+const modal = document.getElementById('modal');
+function openModal(p) {
+  document.getElementById('modalImg').src = p.img;
+  document.getElementById('modalName').textContent = p.name;
+  document.getElementById('modalBreed').textContent = `${p.breed} • ${p.type}`;
+  document.getElementById('modalType').textContent = `Type: ${p.type}`;
+  document.getElementById('modalLocation').textContent = `Location: ${p.location}`;
+  document.getElementById('modalDesc').textContent = p.desc;
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal() {
+  modal.classList.remove('flex');
+  modal.classList.add('hidden');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+/* -------------------------
+   UI interactions & event wiring
+   ------------------------- */
+searchInput.addEventListener('input', () => filterPets());
+clearSearchBtn.addEventListener('click', () => { searchInput.value=''; filterPets(); });
+
+// filter dropdown toggle and outside click close
+filterToggle.addEventListener('click', (e) => {
+  e.stopPropagation();
+  filterDropdown.classList.toggle('hidden');
+});
+document.addEventListener('click', (e) => {
+  if (!filterDropdown.classList.contains('hidden')) {
+    if (!filterDropdown.contains(e.target) && e.target !== filterToggle) filterDropdown.classList.add('hidden');
+  }
+});
+
+// apply / reset
+applyFiltersBtn.addEventListener('click', () => { filterDropdown.classList.add('hidden'); filterPets(); });
+resetFiltersBtn.addEventListener('click', () => {
+  document.querySelectorAll('.filter-type,.filter-breed,.filter-loc').forEach(ch => ch.checked = false);
+  searchInput.value = '';
+  filterPets();
+});
+
+// reset view
+document.getElementById('resetView').addEventListener('click', () => {
+  document.querySelectorAll('.filter-type,.filter-breed,.filter-loc').forEach(ch => ch.checked = false);
+  searchInput.value = '';
+  filterPets();
+});
+
+// load more placeholder (server-side pagination later)
+document.getElementById('loadMore').addEventListener('click', () => {
+  alert('Load more placeholder — implement server pagination in fetchPets() later.');
+});
+
+/* -------------------------
+   Theme toggle (works without localStorage)
+   ------------------------- */
+// const themeBtn = document.getElementById('themeToggle');
+// function setThemeIcon() {
+//   const dark = document.documentElement.classList.contains('dark');
+//   themeBtn.textContent = dark ? '🌙' : '🌞';
+// }
+// setThemeIcon();
+// themeBtn.addEventListener('click', () => {
+//   document.documentElement.classList.toggle('dark');
+//   setThemeIcon();
+// });
+
+/* -------------------------
+   Working Theme Toggle (with smooth transitions)
+   ------------------------- */
+const themeBtn = document.getElementById('themeToggle');
+
+// Initialize theme based on system preference
+if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+  document.documentElement.classList.add('dark');
+}
+
+function setThemeIcon() {
+  const isDark = document.documentElement.classList.contains('dark');
+  themeBtn.textContent = isDark ? '🌙' : '🌞';
+}
+
+setThemeIcon();
+
+themeBtn.addEventListener('click', () => {
+  document.documentElement.classList.toggle('dark');
+  document.body.classList.add('transition-all');
+  document.body.classList.add('duration-500');
+  setThemeIcon();
+});
+
+
+/* -------------------------
+   fetchPets() — placeholder for backend integration
+   Replace URL and logic to fetch server data
+   Example:
+     async function fetchPets() {
+       const res = await fetch('/api/pets');
+       const data = await res.json();
+       populateFilters(data);
+       renderPets(data);
+     }
+   ------------------------- */
+async function fetchPets() {
+  // Placeholder - currently uses local `pets` variable
+  // Replace with real fetch when backend is ready.
+  // const res = await fetch('/api/pets'); const data = await res.json();
+  const data = pets; // local fallback
+  populateFilters(data);
+  renderPets(data);
+}
+
+/* Initialize */
+fetchPets();
+
+</script>
+</body>
+</html>
