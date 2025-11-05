@@ -8,7 +8,7 @@ async function connectToDatabase() {
     user: "odms",
     password: "password",
     connectionLimit: 10,
-    database: "Happy_Tails",
+    database: "HappyTails",
   });
 }
 
@@ -19,3 +19,5 @@ function getDb() {
     return database;
   }
 }
+
+module.exports = { connectToDatabase, getDb };

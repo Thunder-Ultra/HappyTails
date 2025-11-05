@@ -2,9 +2,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Homepage</title>
+    <title>Document</title>
   </head>
   <body>
-    <h1>This is a Home Page</h1>
+    <% if (username) { %>
+    <h1>Hello <%= username %></h1>
+    <% } else { %>
+    <h1>You are not logged in</h1>
+    <% } %>
   </body>
 </html>

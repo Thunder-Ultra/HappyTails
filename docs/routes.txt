@@ -1,0 +1,14 @@
+public
+  /
+  /contact
+  /features
+
+authentication
+  GET/login
+  POST/login
+  GET/auth/google :- To redirect to google login page
+  GET/auth/google/callback :- To redirect to server after successfull login
+  GET/register
+  POST/register
+  GET/forgotpassword
+  POST/forgotpassword
