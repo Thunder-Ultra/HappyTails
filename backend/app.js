@@ -1,6 +1,7 @@
 const PORT_NO = 4000;
 
 const express = require("express");
+const cors = require("cors");
 const session = require("express-session");
 const db = require("./data/database");
 const setupPassport = require("./config/passport");
@@ -8,18 +9,34 @@ const createSessionConfig = require("./config/session");
 const publicRoutes = require("./routes/public.routes");
 const authRoutes = require("./routes/auth.routes");
 const baseRoutes = require("./routes/base.routes");
+const {
+  notFound,
+  errorMiddleware,
+  errorHandler,
+} = require("./middlewares/errorMiddleware");
 
 const app = express();
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
 
 app.set("view engine", "ejs");
 app.use(express.static("public"));
+app.use(express.json()); // For handing JSON requests
+app.use(express.urlencoded({ extended: false })); // For handling Forms
 
 app.use(session(createSessionConfig()));
 setupPassport(app);
 
-app.use(publicRoutes);
+app.use(publicRoutes); // if i have an api only backend server then public routes is not required
 app.use(authRoutes);
 app.use(baseRoutes);
+
+app.use(notFound);
+app.use(errorHandler);
 
 db.connectToDatabase()
   .then(() => {

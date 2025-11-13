@@ -1,31 +1,36 @@
-import { GoogleLogin } from "@react-oauth/google";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import RegisterPage from "./pages/RegisterPage";
+import LoginPage from "./pages/LoginPage";
+import Dashboard from "./pages/Dashboard";
+import ProtectedRoute from "./components/ProtectedRoute";
 
-function App() {
-  const handleSuccess = (credentialResponse) => {
-    console.log("Google login success:", credentialResponse);
-
-    // credentialResponse.credential is a JWT token
-    // You can send it to your backend for verification:
-    fetch("http://localhost:4000/auth/google", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ credential: credentialResponse.credential }),
-    })
-      .then((res) => res.json())
-      .then((data) => console.log("Backend verified:", data))
-      .catch((err) => console.error("Error verifying token:", err));
-  };
-
-  const handleError = () => {
-    console.log("Login Failed");
+export default function App() {
+  const logout = () => {
+    localStorage.removeItem("token");
+    window.location.href = "/login";
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen">
-      <h1 className="text-2xl mb-4">Login with Google</h1>
-      <GoogleLogin onSuccess={handleSuccess} onError={handleError} />
-    </div>
+    <Router>
+      <nav className="nav">
+        <Link to="/register">Register</Link>
+        <Link to="/login">Login</Link>
+        <Link to="/dashboard">Dashboard</Link>
+        <button onClick={logout}>Logout</button>
+      </nav>
+
+      <Routes>
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+    </Router>
   );
 }
-
-export default App;

@@ -1,0 +1,40 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Register</title>
+  </head>
+  <body>
+    <h1>Register</h1>
+    <form action="/register" method="POST">
+      <div class="form-control">
+        <label>Name</label>
+        <input type="text" name="name" />
+      </div>
+      <div class="form-control">
+        <label>Email</label>
+        <input type="email" name="email" />
+      </div>
+      <div class="form-control">
+        <label>Password</label>
+        <input type="password" name="password" />
+      </div>
+      <div class="form-control">
+        <label>Re-enter Password</label>
+        <input type="password" name="confirmPassword" />
+      </div>
+      <div class="form-control">
+        <label>Role</label>
+        <input type="checkbox" id="adopter-role" name="role1" value="adopter" />
+        <label for="adopter-role">Adopter</label>
+        <input type="checkbox" id="giver-role" name="role2" value="giver" />
+        <label for="giver-role">Giver</label>
+      </div>
+      <button>Register</button>
+    </form>
+    <p>OR</p>
+    <a href="/auth/google">Sign in with Google</a>
+    <hr />
+    <a href="/login">Already have an account</a>
+  </body>
+</html>
