@@ -1,8 +1,21 @@
 // const { AuthWeakPasswordError } = require("@supabase/supabase-js");
+require("dotenv").config({
+  path: "./googlePassportCredintials.env",
+  quiet: true,
+});
 const User = require("./../models/user.model");
 const newUserSchema = require("../validation/registrationDataValidation");
 const loginDetailSchema = require("../validation/loginDataValidation");
-// const { sanitizeString } = require("../utils/auth.js");
+const { generateToken } = require("./../utils/auth");
+const { OAuth2Client } = require("google-auth-library");
+const { use } = require("passport");
+const { func } = require("joi");
+
+const client = new OAuth2Client(
+  process.env.CLIENT_ID,
+  process.env.CLIENT_SECRET,
+  "http://localhost:4000/auth/google/callback"
+);
 
 async function register(req, res, next) {
   // console.log("Body:", req.body);
@@ -72,36 +85,61 @@ async function login(req, res, next) {
   });
   // Redirect to Login Page if credintials are invalid
   try {
-    const { user_id, error } = await user.login();
+    const { userId, error } = await user.login();
     if (error) {
       return res.json({ msg: error });
     }
-    res.json({ success: true });
+    const token = generateToken(userId);
+    res.json({ success: true, token });
   } catch (err) {
     console.log("User Login Falied");
     next(err);
   }
 }
 
-function getAuthGoogleCallback(req, res) {
-  req.session.user = req.user;
-  console.log(req.user);
-  // res.send(`<h2>Wecome ${req.user.displayName}</h2>`);
-  res.redirect("/home");
+function getAuthGoogle(req, res) {
+  const redirectUrl = client.generateAuthUrl({
+    access_type: "offline",
+    prompt: "consent",
+    scope: ["profile", "email"],
+  });
+
+  res.redirect(redirectUrl);
 }
 
-// function logout(req, res, next) {
-//   console.log("Logging out user");
-//   req.logout(function (err) {
-//     if (err) {
-//       return next(err);
-//     }
-//     // destroy the session to fully log the user out
-//     req.session.destroy(function (err) {
-//       // ignore session destroy errors and redirect to login
-//       res.redirect("/login");
-//     });
-//   });
+async function getAuthGoogleCallback(req, res) {
+  const code = req.query.code;
+
+  const { tokens } = await client.getToken(code);
+
+  const ticket = await client.verifyIdToken({
+    idToken: tokens.id_token,
+    audience: process.env.CLIENT_ID,
+  });
+
+  // console.log("ticket :", ticket);
+
+  const payload = ticket.getPayload();
+
+  // console.log("payload :", payload);
+
+  const token = generateToken({
+    id: payload.sub,
+    email: payload.email,
+    name: payload.name,
+    picture: payload.picture,
+  });
+
+  console.log(token);
+
+  res.redirect(`http://localhost:5173/google-success?token=${token}`);
+}
+
+// function getAuthGoogleCallback(req, res) {
+//   req.session.user = req.user;
+//   console.log(req.user);
+//   // res.send(`<h2>Wecome ${req.user.displayName}</h2>`);
+//   res.redirect("/home");
 // }
 
 function forgotPassword(req, res) {
@@ -119,6 +157,7 @@ function resetPassword(req, res) {
 module.exports = {
   // getLogin,
   login,
+  getAuthGoogle,
   getAuthGoogleCallback,
   // logout,
   // getRegister,

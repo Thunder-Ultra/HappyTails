@@ -17,6 +17,7 @@ export default function LoginPage() {
       if (!res.data.success) {
         return setMsg(res?.data?.msg || "Invalid credentials");
       }
+      // console.log(res.data)
       localStorage.setItem("token", res.data.token);
       navigate("/dashboard");
     } catch (err) {

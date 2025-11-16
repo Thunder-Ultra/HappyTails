@@ -11,12 +11,17 @@ export default function RegisterPage() {
   });
   const [msg, setMsg] = useState("");
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) =>
+    setForm({ ...form, [e.target.name]: e.target.value });
+
+  const handleGoogleLogin = () => {
+    // 👉 Redirect to backend Google OAuth URL
+    window.location.href = "http://localhost:4000/auth/google";
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // ✅ Check if passwords match before sending
     if (form.password !== form["confirm-password"]) {
       setMsg("❌ Passwords do not match");
       return;
@@ -24,18 +29,25 @@ export default function RegisterPage() {
 
     try {
       const { name, email, password, "confirm-password": confirmPassword, role } = form;
-      const res = await API.post("/register", { name, email, password, confirmPassword, role });
 
-      // ✅ Expecting response like { success: true, token, user, message }
+      const res = await API.post("/register", {
+        name,
+        email,
+        password,
+        confirmPassword,
+        role,
+      });
+
       if (res.data.success) {
         localStorage.setItem("token", res.data.token);
         setMsg("✅ Registration successful! You can now go to Dashboard.");
       } else {
-        setMsg("❌ " + res.data.msg || "Registration failed");
+        setMsg("❌ " + (res.data.msg || "Registration failed"));
       }
     } catch (err) {
-      // ✅ If backend sends { success: false, message: "..." }
-      const backendMsg = err.response?.data?.message || "❌ Server error during registration";
+      const backendMsg =
+        err.response?.data?.message ||
+        "❌ Server error during registration";
       setMsg(backendMsg);
     }
   };
@@ -44,6 +56,7 @@ export default function RegisterPage() {
     <div className="container">
       <h2>Register</h2>
 
+      {/* Traditional Register Form */}
       <form onSubmit={handleSubmit}>
         <input name="name" placeholder="Name" onChange={handleChange} required />
         <input name="email" type="email" placeholder="Email" onChange={handleChange} required />
@@ -65,8 +78,16 @@ export default function RegisterPage() {
           <option value="adopter">Adopter</option>
           <option value="giver">Giver</option>
         </select>
+
         <button type="submit">Register</button>
       </form>
+
+      <hr />
+
+      {/* Google OAuth Button */}
+      <button onClick={handleGoogleLogin} style={{ marginTop: "10px" }}>
+        Continue with Google
+      </button>
 
       <p>{msg}</p>
     </div>

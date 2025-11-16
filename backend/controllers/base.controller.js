@@ -1,9 +1,7 @@
 function getHome(req, res) {
-  if (req.session.user) {
-    res.render("home", { username: req.session.user.displayName });
-  } else {
-    res.render("home", { username: null });
-  }
+  res.json({
+    msg: "This was meant to be home, but it will be changed later, as it is going to be a api only server.",
+  });
 }
 
 module.exports = { getHome };
