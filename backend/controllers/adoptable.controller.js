@@ -8,7 +8,7 @@ async function getAdoptables(req, res) {
 
   const result = await Adoptable.getAdoptablesInPages(page, limit, search);
 
-  console.log(result);
+  // console.log(result);
 
   res.json(result);
 }

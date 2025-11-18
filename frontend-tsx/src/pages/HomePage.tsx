@@ -29,9 +29,7 @@ import { useAuth } from "../context/AuthContext";
 
 export const HomePage: React.FC = () => {
   const navigate = useNavigate();
-  const { token, loginWithToken, logout } = useAuth();
-
-  const [authLoading, setAuthLoading] = useState(true);
+  const { token, user, loginWithToken, logout, loading } = useAuth();
 
   const [pets, setPets] = useState<Pet[]>([]);
   const [filteredPets, setFilteredPets] = useState<Pet[]>([]);
@@ -47,17 +45,24 @@ export const HomePage: React.FC = () => {
     vaccinated: false,
   });
 
-  // ----------------------------------------------------------
-  // Verify Session (/me)
-  // ----------------------------------------------------------
+  // ------------------------------------------------------------------
+  // ✔ FIX: Do NOT redirect until AuthContext finishes loading!
+  // ------------------------------------------------------------------
   useEffect(() => {
-    const verifyUser = async () => {
-      if (!token) {
-        setAuthLoading(false);
-        navigate("/login");
-        return;
-      }
+    if (loading) return; // wait
 
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    // if (!loading && !token) {
+    //   navigate("/login");
+    //   // return;
+    // }
+
+    
+    const verifyUser = async () => {
       try {
         const res = await fetch(`${import.meta.env.VITE_BASE_URL}/users/me`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -76,24 +81,27 @@ export const HomePage: React.FC = () => {
         console.error(err);
         toast.error("Unable to verify session.");
         navigate("/login");
-      } finally {
-        setAuthLoading(false);
       }
     };
 
     verifyUser();
-  }, [token, navigate, logout, loginWithToken]);
+  }, [loading, token, navigate, logout, loginWithToken]);
 
-  // ----------------------------------------------------------
-  // Load adoptables from BACKEND (not localStorage)
-  // ----------------------------------------------------------
+  // ------------------------------------------------------------------
+  // Load adoptables AFTER auth verification
+  // ------------------------------------------------------------------
   useEffect(() => {
+    if (!token) return;
+    if (loading) return;
+
     const loadAdoptables = async () => {
-      const jwtToken = localStorage.getItem("token"); // <-- GET TOKEN HERE
       try {
-        const res = await fetch(`${import.meta.env.VITE_BASE_URL}/adoptables?page=1&limit=50`,{
-        headers: { Authorization: `Bearer ${jwtToken}` },
-      });
+        const res = await fetch(
+          `${import.meta.env.VITE_BASE_URL}/adoptables?page=1&limit=50`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
 
         if (!res.ok) {
           toast.error("Unable to load adoptables.");
@@ -102,7 +110,6 @@ export const HomePage: React.FC = () => {
 
         const data = await res.json();
 
-        // Convert backend fields into the Pet interface format
         const formatted = data.adoptables.map((p: any) => ({
           id: p.adoptable_id,
           name: p.name,
@@ -123,11 +130,11 @@ export const HomePage: React.FC = () => {
     };
 
     loadAdoptables();
-  }, []);
+  }, [loading, token]);
 
-  // ----------------------------------------------------------
-  // Apply filters
-  // ----------------------------------------------------------
+  // ------------------------------------------------------------------
+  // Filters
+  // ------------------------------------------------------------------
   useEffect(() => {
     let filtered = [...pets];
 
@@ -153,9 +160,9 @@ export const HomePage: React.FC = () => {
     setFilteredPets(filtered);
   }, [pets, searchQuery, typeFilter, vaccinatedFilter]);
 
-  // ----------------------------------------------------------
+  // ------------------------------------------------------------------
   // AI Match
-  // ----------------------------------------------------------
+  // ------------------------------------------------------------------
   const handleAIMatch = () => {
     let matched = [...pets];
 
@@ -167,8 +174,7 @@ export const HomePage: React.FC = () => {
 
     matched = matched.filter(
       (pet) =>
-        pet.age >= aiPreferences.minAge &&
-        pet.age <= aiPreferences.maxAge
+        pet.age >= aiPreferences.minAge && pet.age <= aiPreferences.maxAge
     );
 
     if (aiPreferences.vaccinated) {
@@ -185,17 +191,20 @@ export const HomePage: React.FC = () => {
     toast.success(`Found ${scored.length} matches!`);
   };
 
-  const types = ["all", ...new Set(pets.map((p) => p.type))];
-
-  // ----------------------------------------------------------
-  // UI
-  // ----------------------------------------------------------
-  if (authLoading)
+  // ------------------------------------------------------------------
+  // UI BLOCKS
+  // ------------------------------------------------------------------
+  if (loading) {
     return (
       <div className="h-screen flex items-center justify-center text-xl">
         Loading...
       </div>
     );
+  }
+
+  if (!token) return null; // prevent flicker
+
+  const types = ["all", ...new Set(pets.map((p) => p.type))];
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -223,7 +232,7 @@ export const HomePage: React.FC = () => {
 
           {/* Type Filter */}
           <div>
-            <Select value={typeFilter} onValueChange={(val:string) => setTypeFilter(val)}>
+            <Select value={typeFilter} onValueChange={(val: string) => setTypeFilter(val)}>
               <SelectTrigger>
                 <SelectValue placeholder="All Types" />
               </SelectTrigger>
@@ -241,7 +250,7 @@ export const HomePage: React.FC = () => {
           <div>
             <Select
               value={vaccinatedFilter === null ? "all" : vaccinatedFilter.toString()}
-              onValueChange={(val:string) =>
+              onValueChange={(val: string) =>
                 setVaccinatedFilter(val === "all" ? null : val === "true")
               }
             >
@@ -311,7 +320,7 @@ export const HomePage: React.FC = () => {
                         value={[aiPreferences.minAge]}
                         max={10}
                         step={1}
-                        onValueChange={(val:number[]) =>
+                        onValueChange={(val: number[]) =>
                           setAiPreferences({ ...aiPreferences, minAge: val[0] })
                         }
                       />
@@ -323,7 +332,7 @@ export const HomePage: React.FC = () => {
                         value={[aiPreferences.maxAge]}
                         max={10}
                         step={1}
-                        onValueChange={(val:number[]) =>
+                        onValueChange={(val: number[]) =>
                           setAiPreferences({ ...aiPreferences, maxAge: val[0] })
                         }
                       />
@@ -336,7 +345,7 @@ export const HomePage: React.FC = () => {
                   <Label>Must be vaccinated</Label>
                   <Switch
                     checked={aiPreferences.vaccinated}
-                    onCheckedChange={(checked:boolean) =>
+                    onCheckedChange={(checked: boolean) =>
                       setAiPreferences({ ...aiPreferences, vaccinated: checked })
                     }
                   />

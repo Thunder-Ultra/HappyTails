@@ -1,9 +1,11 @@
 const { resetPassword } = require("../controllers/auth.controller");
 const bcryptjs = require("bcryptjs");
 const { getDb } = require("./../data/database");
+const { param } = require("../routes/auth.routes");
 
 class User {
   constructor(userData) {
+    this.id = userData.id;
     this.email = userData.email;
     this.name = userData.name;
     this.password = userData.password;
@@ -74,6 +76,34 @@ class User {
       console.log(err);
       return false;
     }
+  }
+  async updateDetails() {
+    // const query = `
+    //   UPDATE Users SET
+    //   ${this.name ? `name=?,` : ""}
+    //   ${this.email ? `email=?,` : ""}
+    //   ${this.password ? `password=?` : ""}
+    //   WHERE user_id=?
+    //   `;
+
+    const query = "UPDATE Users SET name=? WHERE user_id=?";
+
+    let params = [];
+    if (this.name) {
+      params.push(this.name);
+    }
+    if (this.email) {
+      params.push(this.name);
+    }
+    if (this.password) {
+      params.push(this.name);
+    }
+    params.push(this.id);
+
+    console.log(query);
+    console.log(params);
+    const result = await getDb().execute(query, params);
+    return result;
   }
 }
 

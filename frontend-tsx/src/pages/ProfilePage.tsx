@@ -1,6 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
 
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -16,58 +15,148 @@ import {
 } from "../components/ui/card";
 
 import { Badge } from "../components/ui/badge";
-
 import { User, Mail, Briefcase, Home, Clock, PawPrint } from "lucide-react";
-
 import { toast } from "sonner";
 
 export default function ProfilePage() {
-  const { user, updateProfile } = useAuth();
   const navigate = useNavigate();
+  const token = localStorage.getItem("token");
 
-  // ---------------------------------------------------------
-  // HOOKS MUST ALWAYS RUN FIRST (fixes hook order error)
-  // ---------------------------------------------------------
+  const [loading, setLoading] = useState(true);
+  const [firstLoad, setFirstLoad] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+  const [user, setUser] = useState<any>(null);
 
   const [formData, setFormData] = useState({
-    name: user?.name || "",
-    occupation: user?.occupation || "",
-    address: user?.address || "",
-    availableTime: user?.availableTime || "",
-    pastExperience: user?.pastExperience || "",
+    name: "",
+    occupation: "",
+    address: "",
+    availableTime: "",
+    pastExperience: "",
   });
 
   // ---------------------------------------------------------
-  // BLOCK UNAUTHENTICATED ACCESS (safe because hooks already ran)
+  // FETCH USER (safe useEffect + waits for 1 render)
+  // ---------------------------------------------------------
+  useEffect(() => {
+    if (firstLoad) {
+      setFirstLoad(false);
+      return;
+    }
+
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    const fetchUser = async () => {
+      try {
+        const res = await fetch(
+          `${import.meta.env.VITE_BASE_URL}/users/me`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.message || "Failed to load profile");
+
+        setUser(data.user);
+
+        setFormData({
+          name: data.user.name || "",
+          occupation: data.user.occupation || "",
+          address: data.user.address || "",
+          availableTime: data.user.availableTime || "",
+          pastExperience: data.user.pastExperience || "",
+        });
+      } catch (err: any) {
+        toast.error(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUser();
+  }, [token, navigate, firstLoad]);
+
+  // ---------------------------------------------------------
+  // UPDATE PROFILE (PUT) — uses backend's returned updated user
+  // ---------------------------------------------------------
+  const saveChanges = async () => {
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_BASE_URL}/users/me`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(formData),
+        }
+      );
+
+      const data = await res.json();
+      console.log("PUT response:", data);
+
+      if (!res.ok) {
+        toast.error(data.message || "Update failed");
+        return;
+      }
+
+      // 🟢 Backend returns updated user → update the UI instantly
+      if (data.user) {
+        setUser(data.user);
+
+        // Update formData so next edit shows correct values
+        setFormData({
+          name: data.user.name || "",
+          occupation: data.user.occupation || "",
+          address: data.user.address || "",
+          availableTime: data.user.availableTime || "",
+          pastExperience: data.user.pastExperience || "",
+        });
+      }
+
+      toast.success("Profile updated!");
+      setIsEditing(false);
+
+    } catch (err) {
+      console.log(err)
+      toast.error("Something went wrong");
+    }
+  };
+
+  // ---------------------------------------------------------
+  // LOADING STATE
+  // ---------------------------------------------------------
+  if (loading) {
+    return <p className="p-6">Loading profile...</p>;
+  }
+
+  // ---------------------------------------------------------
+  // USER NOT FOUND (after load)
   // ---------------------------------------------------------
   if (!user) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <p>Please log in to view your profile.</p>
+        <p>Unable to load profile. Please log in.</p>
         <Button className="mt-4" onClick={() => navigate("/login")}>
-          Go to Login
+          Login
         </Button>
       </div>
     );
   }
 
   // ---------------------------------------------------------
-  // SAVE CHANGES
+  // UI
   // ---------------------------------------------------------
-  const saveChanges = () => {
-    updateProfile(formData);
-    setIsEditing(false);
-    toast.success("Profile updated successfully!");
-  };
-
   return (
     <div className="container mx-auto px-4 py-8 max-w-3xl">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl mb-2">My Profile</h1>
-        <p className="text-gray-600">Manage your account information</p>
-      </div>
+      <h1 className="text-3xl mb-2">My Profile</h1>
+      <p className="text-gray-600 mb-6">Manage your account information</p>
 
       <Card className="mb-6">
         <CardHeader>
@@ -76,210 +165,151 @@ export default function ProfilePage() {
               <CardTitle>Account Information</CardTitle>
               <CardDescription>Your personal details</CardDescription>
             </div>
-            <Badge variant={user.role === "parent" ? "default" : "secondary"}>
-              {user.role === "parent" ? "Pet Parent" : "Adopter"}
+            <Badge variant="secondary">
+              {user.role === "adopter" ? "Adopter" : user.role}
             </Badge>
           </div>
         </CardHeader>
 
         <CardContent className="space-y-6">
-          {/* Basic Info */}
-          <div className="space-y-4">
-            {/* Name */}
-            <div className="flex items-start gap-3">
-              <User className="h-5 w-5 text-gray-400 mt-0.5" />
-              <div className="flex-1">
-                <Label>Full Name</Label>
+          {/* FULL NAME */}
+          <div className="flex items-start gap-3">
+            <User className="h-5 w-5 text-gray-400 mt-1" />
+            <div className="flex-1">
+              <Label>Full Name</Label>
 
-                {isEditing ? (
-                  <Input
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                  />
-                ) : (
-                  <p>{user.name}</p>
-                )}
-              </div>
-            </div>
-
-            {/* Email */}
-            <div className="flex items-start gap-3">
-              <Mail className="h-5 w-5 text-gray-400 mt-0.5" />
-              <div className="flex-1">
-                <Label>Email</Label>
-                <p>{user.email}</p>
-                <p className="text-xs text-gray-500">
-                  Email cannot be changed
-                </p>
-              </div>
+              {isEditing ? (
+                <Input
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
+                />
+              ) : (
+                <p className="text-sm text-gray-600">{user.name}</p>
+              )}
             </div>
           </div>
 
-          {/* Adopter Fields */}
+          {/* EMAIL */}
+          <div className="flex items-start gap-3">
+            <Mail className="h-5 w-5 text-gray-400 mt-1" />
+            <div className="flex-1">
+              <Label>Email</Label>
+              <p className="text-sm text-gray-600">{user.email}</p>
+              <p className="text-xs text-gray-500">Email cannot be changed</p>
+            </div>
+          </div>
+
+          {/* ADOPTER FIELDS */}
           {user.role === "adopter" && (
-            <>
-              <div className="border-t pt-6">
-                <h3 className="text-lg mb-4">Adopter Profile</h3>
-
-                <div className="space-y-4">
-                  {/* Occupation */}
-                  <div className="flex items-start gap-3">
-                    <Briefcase className="h-5 w-5 text-gray-400 mt-0.5" />
-                    <div className="flex-1">
-                      <Label>Occupation</Label>
-                      {isEditing ? (
-                        <Input
-                          value={formData.occupation}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              occupation: e.target.value,
-                            })
-                          }
-                          placeholder="Your occupation"
-                        />
-                      ) : (
-                        <p>{user.occupation || "Not provided"}</p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Address */}
-                  <div className="flex items-start gap-3">
-                    <Home className="h-5 w-5 text-gray-400 mt-0.5" />
-                    <div className="flex-1">
-                      <Label>Home Address</Label>
-                      {isEditing ? (
-                        <Input
-                          value={formData.address}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              address: e.target.value,
-                            })
-                          }
-                          placeholder="Your address"
-                        />
-                      ) : (
-                        <p>{user.address || "Not provided"}</p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Available Time */}
-                  <div className="flex items-start gap-3">
-                    <Clock className="h-5 w-5 text-gray-400 mt-0.5" />
-                    <div className="flex-1">
-                      <Label>Available Time</Label>
-                      {isEditing ? (
-                        <Input
-                          value={formData.availableTime}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              availableTime: e.target.value,
-                            })
-                          }
-                          placeholder="e.g. 4–6 hours per day"
-                        />
-                      ) : (
-                        <p>{user.availableTime || "Not provided"}</p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Past Experience */}
-                  <div className="flex items-start gap-3">
-                    <PawPrint className="h-5 w-5 text-gray-400 mt-0.5" />
-                    <div className="flex-1">
-                      <Label>Past Experience</Label>
-                      {isEditing ? (
-                        <Textarea
-                          rows={3}
-                          value={formData.pastExperience}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              pastExperience: e.target.value,
-                            })
-                          }
-                          placeholder="Tell us about your experience with pets..."
-                        />
-                      ) : (
-                        <p>{user.pastExperience || "Not provided"}</p>
-                      )}
-                    </div>
-                  </div>
+            <div className="border-t pt-6 space-y-4">
+              {/* Occupation */}
+              <div className="flex items-start gap-3">
+                <Briefcase className="h-5 w-5 text-gray-400 mt-1" />
+                <div className="flex-1">
+                  <Label>Occupation</Label>
+                  {isEditing ? (
+                    <Input
+                      value={formData.occupation}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          occupation: e.target.value,
+                        })
+                      }
+                    />
+                  ) : (
+                    <p>{user.occupation || "Not provided"}</p>
+                  )}
                 </div>
               </div>
 
-              {/* Tip Box */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <p className="text-sm text-blue-800">
-                  💡 Complete your profile to increase your adoption approval
-                  chances.
-                </p>
+              {/* Address */}
+              <div className="flex items-start gap-3">
+                <Home className="h-5 w-5 text-gray-400 mt-1" />
+                <div className="flex-1">
+                  <Label>Address</Label>
+                  {isEditing ? (
+                    <Input
+                      value={formData.address}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          address: e.target.value,
+                        })
+                      }
+                    />
+                  ) : (
+                    <p>{user.address || "Not provided"}</p>
+                  )}
+                </div>
               </div>
-            </>
+
+              {/* Available Time */}
+              <div className="flex items-start gap-3">
+                <Clock className="h-5 w-5 text-gray-400 mt-1" />
+                <div className="flex-1">
+                  <Label>Available Time</Label>
+                  {isEditing ? (
+                    <Input
+                      value={formData.availableTime}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          availableTime: e.target.value,
+                        })
+                      }
+                    />
+                  ) : (
+                    <p>{user.availableTime || "Not provided"}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Past Experience */}
+              <div className="flex items-start gap-3">
+                <PawPrint className="h-5 w-5 text-gray-400 mt-1" />
+                <div className="flex-1">
+                  <Label>Past Experience</Label>
+                  {isEditing ? (
+                    <Textarea
+                      rows={3}
+                      value={formData.pastExperience}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          pastExperience: e.target.value,
+                        })
+                      }
+                    />
+                  ) : (
+                    <p>{user.pastExperience || "Not provided"}</p>
+                  )}
+                </div>
+              </div>
+            </div>
           )}
 
-          {/* Edit / Save Buttons */}
+          {/* ACTION BUTTONS */}
           <div className="flex gap-2 pt-4">
             {isEditing ? (
               <>
-                <Button onClick={saveChanges} className="flex-1">
+                <Button className="flex-1" onClick={saveChanges}>
                   Save Changes
                 </Button>
-
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setIsEditing(false);
-                    setFormData({
-                      name: user.name,
-                      occupation: user.occupation || "",
-                      address: user.address || "",
-                      availableTime: user.availableTime || "",
-                      pastExperience: user.pastExperience || "",
-                    });
-                  }}
-                >
+                <Button variant="outline" onClick={() => setIsEditing(false)}>
                   Cancel
                 </Button>
               </>
             ) : (
-              <Button onClick={() => setIsEditing(true)} className="flex-1">
+              <Button className="flex-1" onClick={() => setIsEditing(true)}>
                 Edit Profile
               </Button>
             )}
           </div>
         </CardContent>
       </Card>
-
-      {/* Stats */}
-      <div className="grid md:grid-cols-2 gap-4">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm">Account Type</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl">
-              {user.role === "parent" ? "Pet Parent" : "Adopter"}
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm">Member Since</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl">2024</p>
-          </CardContent>
-        </Card>
-      </div>
     </div>
   );
 }

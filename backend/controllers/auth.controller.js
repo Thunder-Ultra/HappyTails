@@ -130,7 +130,7 @@ async function getAuthGoogleCallback(req, res) {
     picture: payload.picture,
   });
 
-  console.log(token);
+  // console.log(token);
 
   res.redirect(`http://localhost:3000/google-success?token=${token}`);
 }

@@ -5,6 +5,7 @@ interface AuthContextType {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
+  loading: boolean; // <-- added
   login: (email: string, password: string) => Promise<boolean>;
   register: (
     name: string,
@@ -19,9 +20,13 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
+
+  const [loading, setLoading] = useState(true); // <-- added
 
   const isAuthenticated = Boolean(token);
 
@@ -30,9 +35,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // -------------------------------------------------------
   useEffect(() => {
     const savedToken = localStorage.getItem("token");
+
     if (savedToken) {
       setToken(savedToken);
-      fetchUser(savedToken); // Fetch user details from backend
+      fetchUser(savedToken);
+    } else {
+      setLoading(false); // no token → done loading
     }
   }, []);
 
@@ -41,12 +49,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // -------------------------------------------------------
   const fetchUser = async (jwtToken: string) => {
     try {
-      const res = await fetch(import.meta.env.VITE_BASE_URL+"/users/me", {
+      const res = await fetch(`${import.meta.env.VITE_BASE_URL}/users/me`, {
         headers: { Authorization: `Bearer ${jwtToken}` },
       });
 
       if (!res.ok) {
         logout();
+        setLoading(false); // prevent infinite loading
         return;
       }
 
@@ -55,6 +64,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (err) {
       console.error("Failed to fetch user:", err);
       logout();
+    } finally {
+      setLoading(false); // <-- IMPORTANT
     }
   };
 
@@ -68,7 +79,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     role: "parent" | "adopter"
   ): Promise<boolean> => {
     try {
-      const res = await fetch(import.meta.env.VITE_BASE_URL+"/auth/register", {
+      const res = await fetch(`${import.meta.env.VITE_BASE_URL}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password, role }),
@@ -89,7 +100,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // -------------------------------------------------------
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      const res = await fetch(import.meta.env.VITE_BASE_URL+"/login", {
+      const res = await fetch(`${import.meta.env.VITE_BASE_URL}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -112,11 +123,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setToken(jwtToken);
     localStorage.setItem("token", jwtToken);
 
-    // If backend returned user with token → set immediately
+    setLoading(true); // we're determining user now
+
     if (userData) {
       setUser(userData);
+      setLoading(false);
     } else {
-      // else fetch from /me
       fetchUser(jwtToken);
     }
   };
@@ -145,6 +157,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         user,
         token,
         isAuthenticated,
+        loading, // <-- added
         login,
         register,
         loginWithToken,
