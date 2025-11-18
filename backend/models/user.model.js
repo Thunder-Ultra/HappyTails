@@ -51,6 +51,30 @@ class User {
       console.log(err);
     }
   }
+  static async findById(userId) {
+    const result = await getDb().query(
+      "SELECT email, name from Users Where user_id=?",
+      userId
+    );
+    if (result.length) {
+      return result[0];
+    }
+  }
+  async isAdmin(userId) {
+    try {
+      const result = getDb().query(
+        "SELECT is_admin FROM Users where user_id=?",
+        userId
+      );
+      if (result.length == 0) {
+        return false;
+      }
+      return result[0]["is_admin"];
+    } catch (err) {
+      console.log(err);
+      return false;
+    }
+  }
 }
 
 module.exports = User;

@@ -24,7 +24,7 @@ async function register(req, res, next) {
     name: req.body.name,
     email: req.body.email,
     password: req.body.password,
-    confirmPassword: req.body.confirmPassword,
+    // confirmPassword: req.body.confirmPassword,
     role: req.body.role, // The Role part needs further Clarification :: TODO
   };
   // console.log("Before Sanitization:", registrationData);
@@ -44,7 +44,7 @@ async function register(req, res, next) {
   // console.log(userAlreadyExists);
   if (userAlreadyExists) {
     return res.json({
-      msg: "User already exists! Try login instead!",
+      msg: "Email already exists! Try login instead!",
     });
   }
 
@@ -120,7 +120,7 @@ async function getAuthGoogleCallback(req, res) {
   // console.log("ticket :", ticket);
 
   const payload = ticket.getPayload();
-
+  t;
   // console.log("payload :", payload);
 
   const token = generateToken({
@@ -132,7 +132,7 @@ async function getAuthGoogleCallback(req, res) {
 
   console.log(token);
 
-  res.redirect(`http://localhost:5173/google-success?token=${token}`);
+  res.redirect(`http://localhost:3000/google-success?token=${token}`);
 }
 
 // function getAuthGoogleCallback(req, res) {

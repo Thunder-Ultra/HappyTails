@@ -47,15 +47,15 @@ newUserSchema = Joi.object({
       "any.required": "{#label} is required",
     }),
 
-  confirmPassword: Joi.string()
-    .valid(Joi.ref("password"))
-    .required()
-    .label("Confirm Password")
-    .messages({
-      "any.only": "{#label} must match Password",
-      "string.empty": "{#label} is required",
-      "any.required": "{#label} is required",
-    }),
+  // confirmPassword: Joi.string()
+  //   .valid(Joi.ref("password"))
+  //   .required()
+  //   .label("Confirm Password")
+  //   .messages({
+  //     "any.only": "{#label} must match Password",
+  //     "string.empty": "{#label} is required",
+  //     "any.required": "{#label} is required",
+  //   }),
 
   role: Joi.string()
     .valid("none", "adopter", "giver", "both", "admin")

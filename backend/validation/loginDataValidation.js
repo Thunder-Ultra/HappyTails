@@ -17,20 +17,10 @@ newUserSchema = Joi.object({
       "any.required": "{#label} is required",
     }),
 
-  password: Joi.string()
-    .min(8)
-    .max(128)
-    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/)
-    .required()
-    .label("Password")
-    .messages({
-      "string.empty": "{#label} is required",
-      "string.min": "{#label} must be at least {#limit} characters long",
-      "string.max": "{#label} must be less than {#limit} characters long",
-      "string.pattern.base":
-        "{#label} must include at least one uppercase letter, one lowercase letter, and one number",
-      "any.required": "{#label} is required",
-    }),
+  password: Joi.string().required().label("Password").messages({
+    "string.empty": "{#label} is required",
+    "any.required": "{#label} is required",
+  }),
 });
 
 module.exports = newUserSchema;
