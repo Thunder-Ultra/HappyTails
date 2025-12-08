@@ -112,7 +112,7 @@ CREATE TABLE `happytails`.`Messages` (
 );
 
 CREATE TABLE `happytails`.`PetMedicalRecords` (
-	`id` INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+	`id` INT UNSIGNED PRIMARY KEY AUTO_INCREMENT NOT NULL,
 	`pet_id` INT UNSIGNED,
 	`title` VARCHAR(100),
 	`filename` VARCHAR(255) DEFAULT NULL,
