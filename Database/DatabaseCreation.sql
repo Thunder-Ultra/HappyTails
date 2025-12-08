@@ -150,3 +150,17 @@ CREATE TABLE `happytails`.`AdoptableCompatibility` (
 	CONSTRAINT `has` FOREIGN KEY (`adoptable_id`) REFERENCES `happytails`.`Adoptables`(`id`),
 	CONSTRAINT `compatible_with` FOREIGN KEY (`tag_id`) REFERENCES `happytails`.`CompatibilityTags`(`id`)
 );
+
+CREATE TABLE `happytails`.`UserProfiles` (
+	`user_id` INT UNSIGNED UNIQUE,
+	`occupation` VARCHAR(100),
+	`daily_hours_away` INT UNSIGNED,
+	`housing_type` ENUM('Apartment', 'House', 'Villa', 'Farm'),
+	`ownership_status` ENUM('Owned', 'Rented', 'Living with Parents'),
+	`has_fenced_yard` ENUM('Yes', 'No'),
+	`has_kids` ENUM('Yes', 'No'),
+	`other_pet_details` TEXT,
+	`experience_level` ENUM('First Time', 'Had Pets Before', 'Experienced'),
+	`updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	CONSTRAINT `has_user_profile` FOREIGN KEY (`user_id`) REFERENCES `happytails`.`Users`(`id`)
+);
