@@ -134,7 +134,7 @@ CREATE TABLE `happytails`.`PetPreferences` (
 	`user_id` INT UNSIGNED,
 	`name` VARCHAR(100),
 	`value` VARCHAR(100),
-	CONSTRAINT `has` FOREIGN KEY (`user_id`) REFERENCES `happytails`.`Users`(`id`)
+	CONSTRAINT `have` FOREIGN KEY (`user_id`) REFERENCES `happytails`.`Users`(`id`)
 );
 
 CREATE TABLE `happytails`.`CompatibilityTags` (
