@@ -15,7 +15,7 @@ CREATE TABLE `happytails`.`Addresses` (
 CREATE TABLE `happytails`.`Users` (
 	`id` INT UNSIGNED PRIMARY KEY AUTO_INCREMENT NOT NULL,
 	`name` VARCHAR(50),
-	`email` VARCHAR(100) NOT NULL,
+	`email` VARCHAR(100) UNIQUE NOT NULL,
 	`is_admin` ENUM('Yes', 'No') DEFAULT "No",
 	`password_hash` VARCHAR(255),
 	`address_id` INT UNSIGNED,
