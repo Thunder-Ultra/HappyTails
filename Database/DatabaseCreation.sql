@@ -4,12 +4,12 @@ USE `happytails`;
 
 CREATE TABLE `happytails`.`Addresses` (
 	`id` INT UNSIGNED PRIMARY KEY AUTO_INCREMENT NOT NULL,
-	`house_no` VARCHAR(10),
-	`street` VARCHAR(30),
-	`landmark` VARCHAR(30),
-	`pincode` VARCHAR(30),
-	`town_city` VARCHAR(30),
-	`state` VARCHAR(30)
+	`house_no` VARCHAR(50),
+	`street` VARCHAR(100),
+	`landmark` VARCHAR(100),
+	`pincode` VARCHAR(20),
+	`town_city` VARCHAR(100),
+	`state` VARCHAR(100)
 );
 
 CREATE TABLE `happytails`.`Users` (
@@ -18,7 +18,6 @@ CREATE TABLE `happytails`.`Users` (
 	`email` VARCHAR(100) NOT NULL,
 	`is_admin` ENUM('Yes', 'No') DEFAULT "No",
 	`password_hash` VARCHAR(100),
-	`roles` BINARY(2),
 	`address_id` INT UNSIGNED,
 	`profile_pic_name` VARCHAR(255),
 	`joined_on` TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
@@ -38,7 +37,7 @@ CREATE TABLE `happytails`.`PetBreeds` (
 );
 
 CREATE TABLE `happytails`.`Pets` (
-	`pet_id` INT UNSIGNED PRIMARY KEY AUTO_INCREMENT NOT NULL,
+	`id` INT UNSIGNED PRIMARY KEY AUTO_INCREMENT NOT NULL,
 	`name` VARCHAR(50),
 	`gender` ENUM('Male', 'Female'),
 	`breed_id` INT UNSIGNED,
@@ -61,7 +60,7 @@ CREATE TABLE `happytails`.`Adoptables` (
 	`id` INT UNSIGNED PRIMARY KEY AUTO_INCREMENT NOT NULL,
 	`name` VARCHAR(50),
 	`caretaker_id` INT UNSIGNED,
-	`address_id` INT,
+	`address_id` INT UNSIGNED,
 	`breed_id` INT UNSIGNED,
 	`type_id` INT UNSIGNED,
 	`gender` ENUM('Male', 'Female'),
@@ -118,7 +117,7 @@ CREATE TABLE `happytails`.`PetMedicalRecords` (
 	`title` VARCHAR(100),
 	`filename` VARCHAR(255) DEFAULT NULL,
 	`added_on` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	CONSTRAINT `has_medical_record` FOREIGN KEY (`pet_id`) REFERENCES `happytails`.`Pets`(`pet_id`)
+	CONSTRAINT `has_medical_record` FOREIGN KEY (`pet_id`) REFERENCES `happytails`.`Pets`(`id`)
 );
 
 CREATE TABLE `happytails`.`PetHealthStats` (
@@ -127,27 +126,27 @@ CREATE TABLE `happytails`.`PetHealthStats` (
 	`type` ENUM('Height', 'Weight'),
 	`value` DECIMAL(5,2) UNSIGNED DEFAULT 0,
 	`added_on` TIMESTAMP,
-	CONSTRAINT `hs_hlth_stt` FOREIGN KEY (`pet_id`) REFERENCES `happytails`.`Pets`(`pet_id`)
+	CONSTRAINT `hs_hlth_stt` FOREIGN KEY (`pet_id`) REFERENCES `happytails`.`Pets`(`id`)
 );
 
 CREATE TABLE `happytails`.`PetPreferences` (
-	`id` INT UNSIGNED PRIMARY KEY NOT NULL,
+	`id` INT UNSIGNED PRIMARY KEY AUTO_INCREMENT NOT NULL,
 	`user_id` INT UNSIGNED,
-	`pref_name` VARCHAR(100),
-	`pref_value` VARCHAR(100),
+	`name` VARCHAR(100),
+	`value` VARCHAR(100),
 	CONSTRAINT `has` FOREIGN KEY (`user_id`) REFERENCES `happytails`.`Users`(`id`)
 );
 
-CREATE TABLE `happytails`.`CompabilityTags` (
+CREATE TABLE `happytails`.`CompatibilityTags` (
 	`id` INT UNSIGNED PRIMARY KEY AUTO_INCREMENT NOT NULL,
 	`name` VARCHAR(50)
 );
 
-CREATE TABLE `happytails`.`AdoptableCompability` (
+CREATE TABLE `happytails`.`AdoptableCompatibility` (
 	`id` INT UNSIGNED PRIMARY KEY AUTO_INCREMENT NOT NULL,
 	`adoptable_id` INT UNSIGNED,
 	`tag_id` INT UNSIGNED,
 	UNIQUE (`adoptable_id` ASC, `tag_id` ASC),
-	CONSTRAINT `fk_Adoptables_adoptable_id_to_AdoptableCompability_adoptable_id` FOREIGN KEY (`adoptable_id`) REFERENCES `happytails`.`Adoptables`(`id`),
-	CONSTRAINT `fk_CompabilityTags_tag_id_to_AdoptableCompability_tag_id` FOREIGN KEY (`tag_id`) REFERENCES `happytails`.`CompabilityTags`(`id`)
+	CONSTRAINT `has` FOREIGN KEY (`adoptable_id`) REFERENCES `happytails`.`Adoptables`(`id`),
+	CONSTRAINT `compatible_with` FOREIGN KEY (`tag_id`) REFERENCES `happytails`.`CompatibilityTags`(`id`)
 );
