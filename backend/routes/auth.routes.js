@@ -6,16 +6,16 @@ const router = Router();
 
 router.post("/login", authController.login);
 
-router.get("/auth/google", authController.getAuthGoogle);
+router.get("/google", authController.getAuthGoogle);
 
-router.get("/auth/google/callback", authController.getAuthGoogleCallback);
+router.get("/google/callback", authController.getAuthGoogleCallback);
 
 router.post("/register", authController.register);
 
-router.post("/forgotpassword", authController.forgotPassword);
+router.post("/forgot-password", authController.forgotPassword);
 
-router.post("/verifyotp", authController.verifyOtp);
+router.post("/verify-otp", authController.verifyOtp);
 
-router.post("/resetpassword", authController.resetPassword);
+router.post("/reset-password", authController.resetPassword);
 
 module.exports = router;

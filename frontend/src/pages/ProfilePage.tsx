@@ -58,6 +58,7 @@ export default function ProfilePage() {
           }
         );
 
+        // console.log("repeating here")
         const data = await res.json();
 
         if (!res.ok) throw new Error(data.message || "Failed to load profile");
@@ -97,6 +98,9 @@ export default function ProfilePage() {
           body: JSON.stringify(formData),
         }
       );
+
+      // console.log("repeating here")
+
 
       const data = await res.json();
       console.log("PUT response:", data);
@@ -165,9 +169,6 @@ export default function ProfilePage() {
               <CardTitle>Account Information</CardTitle>
               <CardDescription>Your personal details</CardDescription>
             </div>
-            <Badge variant="secondary">
-              {user.role === "adopter" ? "Adopter" : user.role}
-            </Badge>
           </div>
         </CardHeader>
 
@@ -289,7 +290,8 @@ export default function ProfilePage() {
                 </div>
               </div>
             </div>
-          )}
+          )
+          }
 
           {/* ACTION BUTTONS */}
           <div className="flex gap-2 pt-4">

@@ -3,6 +3,8 @@ const User = require("./../models/user.model");
 async function getMe(req, res) {
   // console.log("It hit GetMe function");
   try {
+    // console.log("res.locals.userId :", res.locals.userId);
+    // console.log("res.locals :", res.locals);
     const result = await User.findById(res.locals.userId);
     // console.log(result);
     return res.json({ user: result });

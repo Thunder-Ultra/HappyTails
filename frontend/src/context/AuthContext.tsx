@@ -53,6 +53,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         headers: { Authorization: `Bearer ${jwtToken}` },
       });
 
+      // console.log("Repeating here")
+
       if (!res.ok) {
         logout();
         setLoading(false); // prevent infinite loading

@@ -1,33 +1,36 @@
 // const { AuthWeakPasswordError } = require("@supabase/supabase-js");
 require("dotenv").config({
-  path: "./googlePassportCredintials.env",
+  path: "./googleClientCredintials.env",
+  quiet: true,
+});
+require("dotenv").config({
+  path: "./serverURI.env",
   quiet: true,
 });
 const User = require("./../models/user.model");
 const newUserSchema = require("../validation/registrationDataValidation");
 const loginDetailSchema = require("../validation/loginDataValidation");
-const { generateToken } = require("./../utils/auth");
-const { OAuth2Client } = require("google-auth-library");
-const { use } = require("passport");
-const { func } = require("joi");
+const {
+  generateToken,
+  redirectGoogleCallbackError,
+} = require("./../utils/auth");
+const { OAuth2Client, OAuth2ClientOptions } = require("google-auth-library");
+const otpCache = require("../utils/otpStore"); // Your Node-Cache instance
+const { sendOtpEmail } = require("../utils/emailService");
+const { hashData, verifyHash } = require("../utils/hashUtil"); // Import the new utils
 
 const client = new OAuth2Client(
   process.env.CLIENT_ID,
   process.env.CLIENT_SECRET,
-  "http://localhost:4000/auth/google/callback"
+  process.env.BACKEND_HOSTING_URI + "/api/auth/google/callback"
 );
 
 async function register(req, res, next) {
-  // console.log("Body:", req.body);
-
   const registrationData = {
     name: req.body.name,
     email: req.body.email,
     password: req.body.password,
-    // confirmPassword: req.body.confirmPassword,
-    role: req.body.role, // The Role part needs further Clarification :: TODO
   };
-  // console.log("Before Sanitization:", registrationData);
 
   const { value: cleanRegistrationData, error } =
     newUserSchema.validate(registrationData);
@@ -35,23 +38,15 @@ async function register(req, res, next) {
     return res.json({ msg: error.details[0].message });
   }
 
-  // console.log(newUserSchema.validate(registrationData));
-  // console.log(cleanRegistrationData);
-
   const userAlreadyExists = await User.findUserByEmail(
     cleanRegistrationData.email
   );
-  // console.log(userAlreadyExists);
+
   if (userAlreadyExists) {
     return res.json({
       msg: "Email already exists! Try login instead!",
     });
   }
-
-  // console.log("After Sanitization:", registrationData);
-  // return res.json({ msg: "User Registered" });
-
-  // delete cleanRegistrationData.confirmPassword;
 
   const newUser = new User(cleanRegistrationData);
 
@@ -104,55 +99,196 @@ function getAuthGoogle(req, res) {
     scope: ["profile", "email"],
   });
 
+  // console.log(redirectUrl);
   res.redirect(redirectUrl);
 }
 
 async function getAuthGoogleCallback(req, res) {
   const code = req.query.code;
 
-  const { tokens } = await client.getToken(code);
+  if (!code) {
+    return redirectGoogleCallbackError(
+      "Failed Google Authorizaition! Try Again!"
+    );
+  }
+  // return redirectGoogleCallbackError("Trial Error");
+  try {
+    // 2. Exchange code for tokens
+    const { tokens } = await client.getToken(code);
 
-  const ticket = await client.verifyIdToken({
-    idToken: tokens.id_token,
-    audience: process.env.CLIENT_ID,
-  });
+    const ticket = await client.verifyIdToken({
+      idToken: tokens.id_token,
+      audience: process.env.CLIENT_ID,
+    });
 
-  // console.log("ticket :", ticket);
+    const payload = ticket.getPayload();
 
-  const payload = ticket.getPayload();
-  t;
-  // console.log("payload :", payload);
+    // 3. Check if user exists in your DB
+    let existingUser = await User.findUserByEmail(payload.email);
+    let isNewUser = false;
 
-  const token = generateToken({
-    id: payload.sub,
-    email: payload.email,
-    name: payload.name,
-    picture: payload.picture,
-  });
+    // 4. Register user if they don't exist
+    if (!existingUser) {
+      try {
+        const newUser = new User({
+          name: payload.name,
+          email: payload.email,
+          // Add picture if your schema supports it
+          // picture: paylogoogle-success?error=truead.picture
+        });
 
-  // console.log(token);
+        await newUser.register();
 
-  res.redirect(`http://localhost:3000/google-success?token=${token}`);
+        // Fetch the newly created user to get the generated ID
+        existingUser = await User.findUserByEmail(payload.email);
+        isNewUser = true;
+      } catch (dbError) {
+        console.error("Registration Error:", dbError);
+        const msg = encodeURIComponent(
+          "Account creation failed. Please try again."
+        );
+        return redirectGoogleCallbackError(msg);
+      }
+    }
+
+    // 5. Generate JWT Token (Ensure you use the user_id from your DB, not Google's sub)
+    // console.log("existingUser :", existingUser);
+    const token = generateToken(existingUser.id);
+
+    // 6. Construct Success URL
+    // Note: using '&' to separate parameters, not '%'
+    let redirectPath = `${
+      process.env.FRONTEND_HOSTING_URI
+    }/google-success?token=${encodeURIComponent(token)}`;
+
+    if (isNewUser) {
+      redirectPath += "&new=true";
+    }
+
+    // 7. Final Redirect to Frontend
+    return res.redirect(redirectPath);
+  } catch (err) {
+    console.error("Google Auth Error:", err);
+    // Generic error handler for token verification failures or other server errors
+    const msg = encodeURIComponent(
+      "Authentication failed. Please try again later."
+    );
+    return redirectGoogleCallbackError(msg);
+  }
 }
 
-// function getAuthGoogleCallback(req, res) {
-//   req.session.user = req.user;
-//   console.log(req.user);
-//   // res.send(`<h2>Wecome ${req.user.displayName}</h2>`);
-//   res.redirect("/home");
+// 1. Forgot Password
+async function forgotPassword(req, res) {
+  try {
+    const { email } = req.body;
+
+    // Check if user exists
+    const user = await User.findUserByEmail(email);
+    if (!user) {
+      return res
+        .status(200)
+        .json({ message: "If that email exists, we sent an OTP." });
+    }
+
+    // Generate random 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Hash OTP using helper function
+    const hashedOtp = await hashData(otp);
+
+    // Store in memory (expires in 10 mins)
+    otpCache.set(email, hashedOtp);
+
+    // Send plain OTP via email
+    await sendOtpEmail(email, otp);
+
+    return res.status(200).json({ message: "OTP sent successfully" });
+  } catch (error) {
+    console.error("Forgot Password Error:", error);
+    return res.status(500).json({ message: "Error sending OTP" });
+  }
+}
+
+// 2. Verify OTP
+async function verifyOtp(req, res) {
+  try {
+    const { email, otp } = req.body;
+
+    const cachedHashedOtp = otpCache.get(email);
+
+    // console.log("DEBUG VALUES");
+    // console.log("email :", email);
+    // console.log("otp :", otp);
+    // console.log("cachedHashedOtp :", cachedHashedOtp);
+
+    if (!cachedHashedOtp) {
+      return res
+        .status(400)
+        .json({ message: "OTP has expired or is invalid." });
+    }
+
+    // Verify OTP using helper function
+    const isMatch = await verifyHash(otp, cachedHashedOtp);
+
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid OTP" });
+    }
+
+    return res.status(200).json({ message: "OTP Verified" });
+  } catch (error) {
+    console.error("Verify OTP Error:", error);
+    return res.status(500).json({ message: "Error verifying OTP" });
+  }
+}
+
+// 3. Reset Password
+async function resetPassword(req, res) {
+  try {
+    const { email, otp, newPassword } = req.body;
+
+    // Re-verify OTP to prevent direct API calls skipping step 2
+    const cachedHashedOtp = otpCache.get(email);
+
+    if (!cachedHashedOtp) {
+      return res
+        .status(400)
+        .json({ message: "Session expired. Please request a new OTP." });
+    }
+
+    const isMatch = await verifyHash(otp, cachedHashedOtp);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid OTP" });
+    }
+
+    // Update User Password in DB
+    const existingUser = await User.findUserByEmail(email);
+    existingUser.password = newPassword;
+    await existingUser.updatePassword();
+
+    // Clear the OTP from memory
+    otpCache.del(email);
+
+    return res.status(200).json({ message: "Password reset successfully" });
+  } catch (error) {
+    console.error("Reset Password Error:", error);
+    return res.status(500).json({ message: "Error resetting password" });
+  }
+}
+
+// function forgotPassword(req, res) {
+//   console.log("OTP Request Recieved");
+//   console.log(req.body);
+//   return res.status(500).json();
 // }
 
-function forgotPassword(req, res) {
-  // res.render("auth/forgotPassword");
-}
+// function verifyOtp(req, res) {
+//   res.render("auth/verifyOtp");
+// }
 
-function verifyOtp(req, res) {
-  res.render("auth/verifyOtp");
-}
-
-function resetPassword(req, res) {
-  res.redirect("/login");
-}
+// function resetPassword(req, res) {
+//   res.redirect("/login");
+//   const newPassword = req.body;
+// }
 
 module.exports = {
   // getLogin,

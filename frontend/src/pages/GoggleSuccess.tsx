@@ -10,7 +10,7 @@ export default function GoogleSuccess() {
 
     if (token) {
       localStorage.setItem("token", token);
-      navigate("/dashboard");
+      navigate("/home");
     }
   }, [navigate]);
 

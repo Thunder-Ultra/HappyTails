@@ -6,7 +6,6 @@ const jwt = require("jsonwebtoken");
 
 function setAuthStatus(req, res, next) {
   const authorizationHeader = req.headers.authorization;
-  // console.log("authorization Header :", authorizationHeader);
   // console.log(authorizationHeader);
   if (authorizationHeader) {
     const token = authorizationHeader.split(" ")[1];
@@ -15,8 +14,10 @@ function setAuthStatus(req, res, next) {
       const tokenData = jwt.verify(token, process.env.JWT_SECRET);
       // console.log("Token expiry date:", new Date(tokenData.iat  ));
       // console.log("Token expiry date:", new Date(tokenData.exp));
+      // console.log("Token Data :", tokenData);
       res.locals.isAuth = true;
       res.locals.userId = tokenData.id;
+      // console.log("tokenData :", tokenData);
       // console.log();
       // console.log(tokenData);
       // console.log(res.locals);

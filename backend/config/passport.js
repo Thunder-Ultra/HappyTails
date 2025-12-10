@@ -1,5 +1,5 @@
 require("dotenv").config({
-  path: "./googlePassportCredintials.env",
+  path: "./googleClientCredintials.env",
   quiet: true,
 });
 const passport = require("passport");

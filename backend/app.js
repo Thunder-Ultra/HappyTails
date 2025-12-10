@@ -4,6 +4,7 @@ const express = require("express");
 const cors = require("cors");
 const session = require("express-session");
 const db = require("./data/database");
+const path = require("path");
 // const setupPassport = require("./config/passport");
 const createSessionConfig = require("./config/session");
 const setAuthStatusMiddleware = require("./middlewares/addAuthStatus");
@@ -27,13 +28,21 @@ app.use(
 );
 
 app.set("view engine", "ejs");
-app.use(express.static("public"));
+// app.use(express.static("public"));
+app.use("/api/uploads", express.static(path.join(__dirname, "public/uploads")));
 app.use(express.json()); // For handing JSON requests
 app.use(express.urlencoded({ extended: false })); // For handling Forms
 
 app.use(session(createSessionConfig()));
 app.use(setAuthStatusMiddleware);
 // setupPassport(app);
+
+// app.use((req, res, next) => {
+//   console.log("-----------START------------");
+//   console.log(req);
+//   console.log("------------END-------------");
+//   next();
+// });
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", checkAuthMiddleware, userRoutes);

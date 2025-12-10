@@ -1,20 +1,20 @@
-const { resetPassword } = require("../controllers/auth.controller");
 const bcryptjs = require("bcryptjs");
 const { getDb } = require("./../data/database");
-const { param } = require("../routes/auth.routes");
 
 class User {
   constructor(userData) {
-    this.id = userData.id;
+    this.id = userData.user_id;
     this.email = userData.email;
     this.name = userData.name;
     this.password = userData.password;
   }
   register() {
-    const password_hash = bcryptjs.hashSync(this.password, 12);
+    const password_hash = this.password
+      ? bcryptjs.hashSync(this.password, 12)
+      : "";
     return getDb().execute(
-      "INSERT INTO Users(name,email,password_hash,roles) VALUES (?,?,?,?)",
-      [this.name, this.email, password_hash, this.role]
+      "INSERT INTO Users(name,email,password_hash) VALUES (?,?,?)",
+      [this.name, this.email, password_hash]
     );
   }
   async login() {
@@ -41,10 +41,10 @@ class User {
   static async findUserByEmail(email) {
     try {
       const result = await getDb().query(
-        `select email from Users where email='${email}' limit 1`
+        `select user_id, email from Users where email='${email}' limit 1`
       );
       if (result) {
-        return result[0];
+        return new User(result[0]);
       } else {
         return null;
       }
@@ -54,6 +54,10 @@ class User {
     }
   }
   static async findById(userId) {
+    if (!userId) {
+      return;
+    }
+    // console.log("userId :", userId);
     const result = await getDb().query(
       "SELECT email, name from Users Where user_id=?",
       userId
@@ -78,14 +82,6 @@ class User {
     }
   }
   async updateDetails() {
-    // const query = `
-    //   UPDATE Users SET
-    //   ${this.name ? `name=?,` : ""}
-    //   ${this.email ? `email=?,` : ""}
-    //   ${this.password ? `password=?` : ""}
-    //   WHERE user_id=?
-    //   `;
-
     const query = "UPDATE Users SET name=? WHERE user_id=?";
 
     let params = [];
@@ -100,10 +96,19 @@ class User {
     }
     params.push(this.id);
 
-    console.log(query);
-    console.log(params);
+    // console.log(query);
+    // console.log(params);
     const result = await getDb().execute(query, params);
     return result;
+  }
+  async updatePassword() {
+    const password_hash = this.password
+      ? bcryptjs.hashSync(this.password, 12)
+      : "";
+    return getDb().execute("UPDATE Users SET password_hash=? WHERE user_id=?", [
+      password_hash,
+      this.id,
+    ]);
   }
 }
 

@@ -67,6 +67,7 @@ export const HomePage: React.FC = () => {
         const res = await fetch(`${import.meta.env.VITE_BASE_URL}/users/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
+        console.log("repating here")
 
         if (!res.ok) {
           logout();
@@ -84,7 +85,7 @@ export const HomePage: React.FC = () => {
       }
     };
 
-    verifyUser();
+    // verifyUser();
   }, [loading, token, navigate, logout, loginWithToken]);
 
   // ------------------------------------------------------------------
