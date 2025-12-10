@@ -3,109 +3,169 @@ const { getDb } = require("./../data/database");
 
 class User {
   constructor(userData) {
-    this.id = userData.user_id;
-    this.email = userData.email;
+    // Database column is 'id', not 'user_id'
+    this.id = userData.id;
     this.name = userData.name;
-    this.password = userData.password;
+    this.email = userData.email;
+    this.password = userData.password; // Raw password (only present during register/login)
+    this.is_admin = userData.is_admin || "No"; // Default to Schema ENUM default
+    this.address_id = userData.address_id || null;
+    this.profile_pic_name = userData.profile_pic_name || null;
   }
-  register() {
+
+  async register() {
     const password_hash = this.password
       ? bcryptjs.hashSync(this.password, 12)
       : "";
-    return getDb().execute(
-      "INSERT INTO Users(name,email,password_hash) VALUES (?,?,?)",
-      [this.name, this.email, password_hash]
-    );
+
+    // Added is_admin to insertion to respect the class property or default
+    const query = `
+      INSERT INTO Users (name, email, password_hash, is_admin, address_id, profile_pic_name) 
+      VALUES (?, ?, ?, ?, ?, ?)
+    `;
+
+    return getDb().execute(query, [
+      this.name,
+      this.email,
+      password_hash,
+      this.is_admin,
+      this.address_id,
+      this.profile_pic_name,
+    ]);
   }
+
   async login() {
-    const userCredintials = await getDb().query(
-      "SELECT user_id,password_hash FROM Users where email=?",
-      this.email
+    // 1. Fetch user by email
+    // Changed 'user_id' to 'id' to match Schema
+    const users = await getDb().query(
+      "SELECT id, password_hash, is_admin, name, email FROM Users WHERE email = ?",
+      [this.email]
     );
 
-    if (userCredintials.length === 0) {
+    if (!users || users.length === 0) {
       return { error: "Email not registered! Try Registering Instead!" };
     }
 
+    const storedUser = users[0];
+
+    // 2. Check Password
     const isAuthenticated = bcryptjs.compareSync(
       this.password,
-      userCredintials[0].password_hash
+      storedUser.password_hash
     );
 
     if (!isAuthenticated) {
-      return { error: "Invalid Credintials" };
+      return { error: "Invalid Credentials" };
     }
 
-    return { userId: userCredintials[0].user_id };
+    // 3. Return user info (useful for session/token)
+    return {
+      userId: storedUser.id,
+      isAdmin: storedUser.is_admin === "Yes", // Convert ENUM to boolean for frontend
+      name: storedUser.name,
+      email: storedUser.email,
+    };
   }
+
   static async findUserByEmail(email) {
     try {
+      // SECURITY FIX: Used '?' instead of '${email}' to prevent SQL Injection
       const result = await getDb().query(
-        `select user_id, email from Users where email='${email}' limit 1`
+        "SELECT * FROM Users WHERE email = ? LIMIT 1",
+        [email]
       );
-      if (result) {
+
+      // MariaDB connector returns an array
+      if (result && result.length > 0) {
         return new User(result[0]);
       } else {
         return null;
       }
     } catch (err) {
-      console.log("Failed fetching user data from database");
-      console.log(err);
+      console.log("Failed fetching user data from database", err);
+      throw err;
     }
   }
+
   static async findById(userId) {
     if (!userId) {
-      return;
+      return null;
     }
-    // console.log("userId :", userId);
+
+    // Changed 'user_id' to 'id'
     const result = await getDb().query(
-      "SELECT email, name from Users Where user_id=?",
-      userId
+      "SELECT id, name, email, is_admin, address_id, profile_pic_name, joined_on FROM Users WHERE id = ?",
+      [userId]
     );
-    if (result.length) {
-      return result[0];
+
+    if (result && result.length > 0) {
+      return new User(result[0]);
     }
+    return null;
   }
+
   async isAdmin(userId) {
     try {
-      const result = getDb().query(
-        "SELECT is_admin FROM Users where user_id=?",
-        userId
+      // Changed 'user_id' to 'id'
+      const result = await getDb().query(
+        "SELECT is_admin FROM Users WHERE id = ?",
+        [userId]
       );
-      if (result.length == 0) {
+
+      if (result.length === 0) {
         return false;
       }
-      return result[0]["is_admin"];
+
+      // Compare with ENUM string 'Yes'
+      return result[0].is_admin === "Yes";
     } catch (err) {
       console.log(err);
       return false;
     }
   }
-  async updateDetails() {
-    const query = "UPDATE Users SET name=? WHERE user_id=?";
 
+  // Refactored to actually work with dynamic updates
+  async updateDetails() {
+    let fields = [];
     let params = [];
+
+    // Check which fields exist on the instance and build query dynamically
     if (this.name) {
+      fields.push("name = ?");
       params.push(this.name);
     }
     if (this.email) {
-      params.push(this.name);
+      fields.push("email = ?");
+      params.push(this.email);
     }
-    if (this.password) {
-      params.push(this.name);
+    if (this.address_id) {
+      fields.push("address_id = ?");
+      params.push(this.address_id);
     }
-    params.push(this.id);
+    if (this.profile_pic_name) {
+      fields.push("profile_pic_name = ?");
+      params.push(this.profile_pic_name);
+    }
 
-    // console.log(query);
-    // console.log(params);
+    if (fields.length === 0) {
+      return; // Nothing to update
+    }
+
+    params.push(this.id); // Add ID for WHERE clause
+
+    const query = `UPDATE Users SET ${fields.join(", ")} WHERE id = ?`;
+
     const result = await getDb().execute(query, params);
     return result;
   }
-  async updatePassword() {
-    const password_hash = this.password
-      ? bcryptjs.hashSync(this.password, 12)
-      : "";
-    return getDb().execute("UPDATE Users SET password_hash=? WHERE user_id=?", [
+
+  async updatePassword(newPassword) {
+    // Allow passing new password directly, or use this.password
+    const passwordToHash = newPassword || this.password;
+
+    const password_hash = bcryptjs.hashSync(passwordToHash, 12);
+
+    return getDb().execute("UPDATE Users SET password_hash = ? WHERE id = ?", [
       password_hash,
       this.id,
     ]);
