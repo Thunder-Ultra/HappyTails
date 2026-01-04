@@ -10,15 +10,19 @@ import { LoginPage } from "./pages/LoginPage";
 import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
 import { HomePage } from "./pages/HomePage";
 
-import PetDetailsPage from "./pages/PetDetailsPage";
 import { AdoptablesPage } from "./pages/AdoptablesPage";
+import AdoptableDetailsPage from "./pages/AdoptableDetailsPage";
+import AdoptionRequestsPage from "./pages/AdoptionRequestsPage";
+import MyRequestsPage from "./pages/MyRequestsPage"
 import InterestedRequestsPage from "./pages/InterestedRequestsPage";
 import MyPetsPage from "./pages/MyPetsPage";
 import PetProfilePage from "./pages/PetProfilePage";
 import ProfilePage from "./pages/ProfilePage";
+import AdminPanel from "./pages/AdminPanel";
 
 import { Toaster } from "./components/ui/sonner";
 import { initializeMockData } from "./utils/mockData";
+import PetHealthProfilePage from "./pages/PetHeathProfilePage";
 
 const AppContent = () => {
   const { user } = useAuth();
@@ -51,12 +55,16 @@ const AppContent = () => {
           <Route path="/adoptables" element={<AdoptablesPage />} />
           <Route path="/requests" element={<InterestedRequestsPage />} />
           <Route path="/mypets" element={<MyPetsPage />} />
+          <Route path="/petprofile/:id" element={<PetHealthProfilePage />} />
           <Route path="/profile" element={<ProfilePage />} />
 
-          <Route path="/pet/:id" element={<PetDetailsPage />} />
-          <Route path="/petprofile/:id" element={<PetProfilePage />} />
+          <Route path="/adoptable/:id" element={<AdoptableDetailsPage />} />
+          <Route path="/adop-requests/:id" element={<AdoptionRequestsPage />} />
+          <Route path="/my-requests/" element={<MyRequestsPage />} />
 
-          <Route path="/auth/google/success" element={<GoogleSuccess />} />
+          <Route path="/admin" element={<AdminPanel />} />
+
+          <Route path="/auth/google-success" element={<GoogleSuccess />} />
         </Routes>
       </main>
 

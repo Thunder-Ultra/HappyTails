@@ -3,172 +3,213 @@ const { getDb } = require("./../data/database");
 
 class User {
   constructor(userData) {
-    // Database column is 'id', not 'user_id'
     this.id = userData.id;
     this.name = userData.name;
     this.email = userData.email;
-    this.password = userData.password; // Raw password (only present during register/login)
-    this.is_admin = userData.is_admin || "No"; // Default to Schema ENUM default
+    this.password = userData.password;
+    this.is_admin = userData.is_admin || "No";
     this.address_id = userData.address_id || null;
     this.profile_pic_name = userData.profile_pic_name || null;
   }
 
-  async register() {
-    const password_hash = this.password
-      ? bcryptjs.hashSync(this.password, 12)
-      : "";
+  /**
+   * 1. The "Master" Update Function
+   * This fixes your 'updateDetails is not a function' error.
+   * It orchestrates the update across three tables.
+   */
+  async updateDetails(baseData, profileData, addressData) {
+    const db = getDb();
 
-    // Added is_admin to insertion to respect the class property or default
-    const query = `
-      INSERT INTO Users (name, email, password_hash, is_admin, address_id, profile_pic_name) 
-      VALUES (?, ?, ?, ?, ?, ?)
-    `;
-
-    return getDb().execute(query, [
-      this.name,
-      this.email,
-      password_hash,
-      this.is_admin,
-      this.address_id,
-      this.profile_pic_name,
-    ]);
-  }
-
-  async login() {
-    // 1. Fetch user by email
-    // Changed 'user_id' to 'id' to match Schema
-    const users = await getDb().query(
-      "SELECT id, password_hash, is_admin, name, email FROM Users WHERE email = ?",
-      [this.email]
-    );
-
-    if (!users || users.length === 0) {
-      return { error: "Email not registered! Try Registering Instead!" };
-    }
-
-    const storedUser = users[0];
-
-    // 2. Check Password
-    const isAuthenticated = bcryptjs.compareSync(
-      this.password,
-      storedUser.password_hash
-    );
-
-    if (!isAuthenticated) {
-      return { error: "Invalid Credentials" };
-    }
-
-    // 3. Return user info (useful for session/token)
-    return {
-      userId: storedUser.id,
-      isAdmin: storedUser.is_admin === "Yes", // Convert ENUM to boolean for frontend
-      name: storedUser.name,
-      email: storedUser.email,
-    };
-  }
-
-  static async findUserByEmail(email) {
     try {
-      // SECURITY FIX: Used '?' instead of '${email}' to prevent SQL Injection
-      const result = await getDb().query(
-        "SELECT * FROM Users WHERE email = ? LIMIT 1",
-        [email]
-      );
-
-      // MariaDB connector returns an array
-      if (result && result.length > 0) {
-        return new User(result[0]);
-      } else {
-        return null;
+      // Step A: Update core User table (Name)
+      if (baseData.name) {
+        await db.query("UPDATE Users SET name = ? WHERE id = ?", [
+          baseData.name,
+          this.id,
+        ]);
       }
+
+      // Step B: Update Address (if provided)
+      if (addressData) {
+        await this.updateAddress(addressData);
+      }
+
+      // Step C: Update UserProfile (if provided)
+      if (profileData) {
+        await this.updateAdoptionProfile(profileData);
+      }
+
+      return { success: true };
     } catch (err) {
-      console.log("Failed fetching user data from database", err);
+      console.error("Model Error: updateDetails failed", err);
       throw err;
     }
   }
 
-  static async findById(userId) {
-    if (!userId) {
-      return null;
-    }
+  /**
+   * 2. Handle UserProfiles Table (Upsert)
+   * Uses ON DUPLICATE KEY UPDATE so it works even if the row doesn't exist yet
+   */
+  async updateAdoptionProfile(p) {
+    const db = getDb();
+    const query = `
+      INSERT INTO UserProfiles 
+        (user_id, occupation, daily_hours_away, housing_type, ownership_status, has_fenced_yard, has_kids, other_pet_details, experience_level)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON DUPLICATE KEY UPDATE
+        occupation = VALUES(occupation),
+        daily_hours_away = VALUES(daily_hours_away),
+        housing_type = VALUES(housing_type),
+        ownership_status = VALUES(ownership_status),
+        has_fenced_yard = VALUES(has_fenced_yard),
+        has_kids = VALUES(has_kids),
+        other_pet_details = VALUES(other_pet_details),
+        experience_level = VALUES(experience_level)
+    `;
 
-    // Changed 'user_id' to 'id'
-    const result = await getDb().query(
-      "SELECT id, name, email, is_admin, address_id, profile_pic_name, joined_on FROM Users WHERE id = ?",
-      [userId]
-    );
-
-    if (result && result.length > 0) {
-      return new User(result[0]);
-    }
-    return null;
+    return await db.query(query, [
+      this.id,
+      p.occupation,
+      p.daily_hours_away,
+      p.housing_type,
+      p.ownership_status,
+      p.has_fenced_yard,
+      p.has_kids,
+      p.other_pet_details,
+      p.experience_level,
+    ]);
   }
 
-  async isAdmin(userId) {
-    try {
-      // Changed 'user_id' to 'id'
-      const result = await getDb().query(
-        "SELECT is_admin FROM Users WHERE id = ?",
-        [userId]
-      );
+  /**
+   * 3. Handle Addresses Table
+   * Checks if user has an address_id; if not, creates one and links it.
+   */
+  async updateAddress(a) {
+    const db = getDb();
 
-      if (result.length === 0) {
-        return false;
+    // Check if we need to INSERT or UPDATE
+    if (this.address_id) {
+      const query = `
+        UPDATE Addresses 
+        SET house_no = ?, street = ?, landmark = ?, pincode = ?, town_city = ?, state = ? 
+        WHERE id = ?
+      `;
+      return await db.query(query, [
+        a.house_no,
+        a.street,
+        a.landmark,
+        a.pincode,
+        a.town_city,
+        a.state,
+        this.address_id,
+      ]);
+    } else {
+      const query = `
+        INSERT INTO Addresses (house_no, street, landmark, pincode, town_city, state) 
+        VALUES (?, ?, ?, ?, ?, ?)
+      `;
+      const result = await db.query(query, [
+        a.house_no,
+        a.street,
+        a.landmark,
+        a.pincode,
+        a.town_city,
+        a.state,
+      ]);
+      const newAddressId = result.insertId || result[0].insertId;
+
+      // Link the new address back to the User
+      await db.query("UPDATE Users SET address_id = ? WHERE id = ?", [
+        newAddressId,
+        this.id,
+      ]);
+      this.address_id = newAddressId; // Update instance property
+      return newAddressId;
+    }
+  }
+
+  // --- EXISTING METHODS (STAY THE SAME) ---
+
+  async login() {
+    const db = getDb();
+    const rows = await db.query(
+      "SELECT id, name, email, password_hash, is_admin FROM Users WHERE email = ? LIMIT 1",
+      [this.email]
+    );
+    const user = rows[0];
+    if (!user) return { error: "Email not registered!" };
+    if (!bcryptjs.compareSync(this.password, user.password_hash))
+      return { error: "Invalid credentials" };
+    return {
+      userId: user.id,
+      name: user.name,
+      isAdmin: user.is_admin === "Yes",
+    };
+  }
+
+  async register() {
+    const db = getDb();
+    const hash = bcryptjs.hashSync(this.password, 12);
+    const query = `INSERT INTO Users (name, email, password_hash) VALUES (?, ?, ?)`;
+    const result = await db.query(query, [this.name, this.email, hash]);
+    return result.insertId || result[0]?.insertId;
+  }
+
+  static async findUserByEmail(email) {
+    const db = getDb();
+    const result = await db.query(
+      "SELECT * FROM Users WHERE email = ? LIMIT 1",
+      [email]
+    );
+    return result[0] || null;
+  }
+
+  static async findById(userId) {
+    const db = getDb();
+    const query = `
+      SELECT 
+        u.id, 
+        u.name, 
+        u.email, 
+        u.is_admin, 
+        u.profile_pic_name, 
+        u.address_id, 
+        u.joined_on,
+        -- UserProfiles fields
+        up.occupation, 
+        up.daily_hours_away, 
+        up.housing_type, 
+        up.ownership_status, 
+        up.has_fenced_yard, 
+        up.has_kids, 
+        up.other_pet_details, 
+        up.experience_level,
+        -- Addresses fields
+        addr.house_no, 
+        addr.street, 
+        addr.landmark, 
+        addr.pincode, 
+        addr.town_city, 
+        addr.state
+      FROM Users u
+      LEFT JOIN UserProfiles up ON u.id = up.user_id
+      LEFT JOIN Addresses addr ON u.address_id = addr.id
+      WHERE u.id = ?
+    `;
+
+    try {
+      const rows = await db.query(query, [userId]);
+
+      // MariaDB returns an array. We return the first object or null.
+      if (!rows || rows.length === 0) {
+        return null;
       }
 
-      // Compare with ENUM string 'Yes'
-      return result[0].is_admin === "Yes";
+      return rows[0];
     } catch (err) {
-      console.log(err);
-      return false;
+      console.error("Database error in User.findById:", err);
+      throw err;
     }
-  }
-
-  // Refactored to actually work with dynamic updates
-  async updateDetails() {
-    let fields = [];
-    let params = [];
-
-    // Check which fields exist on the instance and build query dynamically
-    if (this.name) {
-      fields.push("name = ?");
-      params.push(this.name);
-    }
-    if (this.email) {
-      fields.push("email = ?");
-      params.push(this.email);
-    }
-    if (this.address_id) {
-      fields.push("address_id = ?");
-      params.push(this.address_id);
-    }
-    if (this.profile_pic_name) {
-      fields.push("profile_pic_name = ?");
-      params.push(this.profile_pic_name);
-    }
-
-    if (fields.length === 0) {
-      return; // Nothing to update
-    }
-
-    params.push(this.id); // Add ID for WHERE clause
-
-    const query = `UPDATE Users SET ${fields.join(", ")} WHERE id = ?`;
-
-    const result = await getDb().execute(query, params);
-    return result;
-  }
-
-  async updatePassword(newPassword) {
-    // Allow passing new password directly, or use this.password
-    const passwordToHash = newPassword || this.password;
-
-    const password_hash = bcryptjs.hashSync(passwordToHash, 12);
-
-    return getDb().execute("UPDATE Users SET password_hash = ? WHERE id = ?", [
-      password_hash,
-      this.id,
-    ]);
   }
 }
 

@@ -1,23 +1,24 @@
 const mariadb = require("mariadb");
+require("dotenv").config({ quiet: true });
 
-let database;
+let pool;
 
 async function connectToDatabase() {
-  database = await mariadb.createPool({
-    host: "localhost",
-    user: "odms",
-    password: "password",
+  pool = mariadb.createPool({
+    host: process.env.DB_HOST || "localhost",
+    user: process.env.DB_USER || "odms",
+    password: process.env.DB_PASSWORD || "password",
+    database: process.env.DB_NAME || "happytails",
     connectionLimit: 10,
-    database: "HappyTails",
   });
+  console.log("Database Pool Created");
 }
 
 function getDb() {
-  if (!database) {
-    throw new Error("Database not connected!");
-  } else {
-    return database;
+  if (!pool) {
+    throw new Error("Database not connected! Call connectToDatabase first.");
   }
+  return pool;
 }
 
 module.exports = { connectToDatabase, getDb };

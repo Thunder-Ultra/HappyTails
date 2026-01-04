@@ -26,41 +26,34 @@ const client = new OAuth2Client(
 );
 
 async function register(req, res, next) {
-  const registrationData = {
-    name: req.body.name,
-    email: req.body.email,
-    password: req.body.password,
-  };
+  // 1. Validate incoming JSON from React
+  const { value: cleanData, error } = newUserSchema.validate(req.body);
 
-  const { value: cleanRegistrationData, error } =
-    newUserSchema.validate(registrationData);
   if (error) {
-    return res.json({ msg: error.details[0].message });
+    return res.status(400).json({ msg: error.details[0].message });
   }
-
-  const userAlreadyExists = await User.findUserByEmail(
-    cleanRegistrationData.email
-  );
-
-  if (userAlreadyExists) {
-    return res.json({
-      msg: "Email already exists! Try login instead!",
-    });
-  }
-
-  const newUser = new User(cleanRegistrationData);
 
   try {
-    const response = await newUser.register();
-    // console.log(response);
-    return res.json({ success: true, msg: "Registration Successful" });
+    // 2. Check for duplicate email
+    const userExists = await User.findUserByEmail(cleanData.email);
+    if (userExists) {
+      return res
+        .status(400)
+        .json({ msg: "Email already registered. Try logging in!" });
+    }
+
+    // 3. Create and Save User
+    const newUser = new User(cleanData);
+    await newUser.register();
+
+    // 4. Send JSON response
+    res.status(201).json({
+      success: true,
+      msg: "Registration successful! You can now log in.",
+    });
   } catch (err) {
-    console.log("User Registration Failed");
-    next(err);
-    // console.log(err);
-    // return res.json({ msg: "Registration Failed" });
+    next(err); // Pass to errorMiddleware.js
   }
-  // res.redirect("/login");
 }
 
 async function login(req, res, next) {
@@ -105,6 +98,8 @@ function getAuthGoogle(req, res) {
 
 async function getAuthGoogleCallback(req, res) {
   const code = req.query.code;
+
+  // console.log(code);
 
   if (!code) {
     return redirectGoogleCallbackError(
@@ -153,13 +148,14 @@ async function getAuthGoogleCallback(req, res) {
 
     // 5. Generate JWT Token (Ensure you use the user_id from your DB, not Google's sub)
     // console.log("existingUser :", existingUser);
+    // console.log(existingUser);
     const token = generateToken(existingUser.id);
 
     // 6. Construct Success URL
     // Note: using '&' to separate parameters, not '%'
     let redirectPath = `${
       process.env.FRONTEND_HOSTING_URI
-    }/google-success?token=${encodeURIComponent(token)}`;
+    }/auth/google-success?token=${encodeURIComponent(token)}`;
 
     if (isNewUser) {
       redirectPath += "&new=true";

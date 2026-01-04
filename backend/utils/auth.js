@@ -26,7 +26,7 @@ function redirectGoogleCallbackError(msg) {
   return res.redirect(
     `${
       process.env.FRONTEND_HOSTING_URI
-    }/google-success?error=true&msg=${encodeURIComponent(message)}`
+    }/auth/google-success?error=true&msg=${encodeURIComponent(message)}`
   );
 }
 

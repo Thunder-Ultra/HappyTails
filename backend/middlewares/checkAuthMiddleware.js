@@ -1,4 +1,8 @@
 function checkAuth(req, res, next) {
+  // console.log(req.headers);
+  // console.log(res.locals.isAuth);
+  // console.log("Checked Authentication");
+  // console.log(res.locals.isAuth);
   // console.log("res.locals.isAuth :", res.locals.isAuth);
   if (!res.locals.isAuth) {
     console.log("Unauthorized User");

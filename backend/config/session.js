@@ -8,7 +8,7 @@ function createStore() {
       host: "localhost",
       user: "odms",
       password: "password",
-      database: "HappyTails",
+      database: "happytails",
     },
   });
   const store = new ConnectSessionKnexStore({

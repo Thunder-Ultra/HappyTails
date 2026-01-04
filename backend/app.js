@@ -8,14 +8,22 @@ const path = require("path");
 // const setupPassport = require("./config/passport");
 const createSessionConfig = require("./config/session");
 const setAuthStatusMiddleware = require("./middlewares/addAuthStatus");
+const publicRoutes = require("./routes/public.routes");
 const authRoutes = require("./routes/auth.routes");
 const userRoutes = require("./routes/user.routes");
 const adoptableRoutes = require("./routes/adoptable.routes");
+const adoptionRoutes = require("./routes/adoption.routes");
 const petRoutes = require("./routes/pet.routes");
+const messageRoutes = require("./routes/message.routes.js");
 const adminRoutes = require("./routes/admin.routes");
 const checkAuthMiddleware = require("./middlewares/checkAuthMiddleware");
 const checkAdminMiddleware = require("./middlewares/checkAdmin");
 const { notFound, errorHandler } = require("./middlewares/errorMiddleware");
+
+BigInt.prototype.toJSON = function () {
+  const int = Number.parseInt(this.toString());
+  return int ?? this.toString();
+};
 
 const app = express();
 app.use(
@@ -35,19 +43,14 @@ app.use(express.urlencoded({ extended: false })); // For handling Forms
 
 app.use(session(createSessionConfig()));
 app.use(setAuthStatusMiddleware);
-// setupPassport(app);
 
-// app.use((req, res, next) => {
-//   console.log("-----------START------------");
-//   console.log(req);
-//   console.log("------------END-------------");
-//   next();
-// });
-
+app.use("/api/public/", publicRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/users", checkAuthMiddleware, userRoutes);
 app.use("/api/adoptables", checkAuthMiddleware, adoptableRoutes);
+app.use("/api/adoption/", checkAuthMiddleware, adoptionRoutes);
 app.use("/api/pets", checkAuthMiddleware, petRoutes);
+app.use("/api/messages", checkAuthMiddleware, messageRoutes);
 app.use("/api/admin", checkAuthMiddleware, checkAdminMiddleware, adminRoutes);
 
 app.use(notFound);

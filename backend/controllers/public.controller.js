@@ -1,13 +1,27 @@
-function getIntro(req, res) {
-  res.render("intro");
+const { getDb } = require("../data/database");
+
+async function getPetTypes(req, res, next) {
+  try {
+    const db = getDb();
+    const types = await db.query("SELECT * FROM PetTypes ORDER BY name ASC");
+    res.json(types);
+  } catch (err) {
+    next(err);
+  }
 }
 
-function getContact(req, res) {
-  res.render("about");
+async function getBreedsByType(req, res, next) {
+  try {
+    const db = getDb();
+    const { typeId } = req.query;
+    const breeds = await db.query(
+      "SELECT * FROM PetBreeds WHERE type_id = ? ORDER BY name ASC",
+      [typeId]
+    );
+    res.json(breeds);
+  } catch (err) {
+    next(err);
+  }
 }
 
-function getFeatures(req, res) {
-  res.render("features");
-}
-
-module.exports = { getIntro, getContact, getFeatures };
+module.exports = { getPetTypes, getBreedsByType };

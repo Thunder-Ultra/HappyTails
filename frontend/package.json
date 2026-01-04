@@ -43,13 +43,15 @@
             "react-hook-form": "^7.55.0",
             "react-resizable-panels": "^2.1.7",
             "react-router-dom": "^7.9.6",
-            "recharts": "^2.15.2",
+            "recharts": "^2.15.4",
             "sonner": "^2.0.3",
             "tailwind-merge": "*",
             "vaul": "^1.1.2"
       },
       "devDependencies": {
+            "@tailwindcss/vite": "^4.1.18",
             "@vitejs/plugin-react-swc": "^3.10.2",
+            "tailwindcss": "^4.1.18",
             "vite": "^6.4.1"
       },
       "scripts": {

@@ -1,9 +1,10 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
+import tailwindcss from "@tailwindcss/vite"; // <-- Import this
 import path from "path";
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
   resolve: {
     // Removed .ts and .tsx from extensions if you prefer strict JS,
     // but keeping them usually doesn't hurt. Standard JS project setup:

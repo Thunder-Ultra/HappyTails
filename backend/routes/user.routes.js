@@ -1,13 +1,8 @@
-const { Router } = require("express");
-const userController = require("./../controllers/user.controller");
-// const checkAuthMiddleware = require("./../middlewares/checkAuthMiddleware");
-
-const router = Router();
-
-// router.use(checkAuthMiddleware);
+const express = require("express");
+const router = express.Router();
+const userController = require("../controllers/user.controller");
 
 router.get("/me", userController.getMe);
-
-router.put("/me", userController.setMe);
+router.patch("/me", userController.setMe);
 
 module.exports = router;

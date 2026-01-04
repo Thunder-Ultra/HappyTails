@@ -1,30 +1,23 @@
-const { Router } = require("express");
-const adoptableController = require("./../controllers/adoptable.controller");
-const upload = require("./../middlewares/upload");
+const express = require("express");
+const router = express.Router();
+const adoptableController = require("../controllers/adoptable.controller");
+const upload = require("../middlewares/upload");
+// const checkAuth = require("../middlewares/checkAuthMiddleware");
 
-const router = new Router();
-
-// /api/adoptables/
-
-router.post("/", upload.array("images", 5), adoptableController.addAdoptable);
-
-// For Listing the Pets added for adoption by you
-router.get("/my", adoptableController.getMyAdoptables);
-
+// Public
 router.get("/", adoptableController.getAdoptables);
+router.get("/item/:id", adoptableController.getAdoptable);
 
-router.get("/:id", adoptableController.getAdoptable);
+// Protected (Requires login)
+// router.use(checkAuth);
 
-router.put(
+router.get("/my-listings", adoptableController.getMyAdoptables);
+router.post("/", upload.array("images", 5), adoptableController.addAdoptable);
+router.patch(
   "/:id",
   upload.array("images", 5),
   adoptableController.updateAdoptable
 );
-
-// For Anyone Looking for Adopting a Pet
-
-router.get("/adoption-requests", adoptableController.getAdopRequests);
-
 router.delete("/:id", adoptableController.deleteAdoptable);
 
 module.exports = router;

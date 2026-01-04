@@ -18,8 +18,8 @@ function setupPassport(app) {
         callbackURL: "/auth/google/callback",
       },
       (accessToken, refreshToken, profile, done) => {
-        console.log("accessToken", accessToken);
-        console.log("refreshToken", refreshToken);
+        // console.log("accessToken", accessToken);
+        // console.log("refreshToken", refreshToken);
         // console.log("profile", profile);
         // Called after google verifies the user
         return done(null, profile);

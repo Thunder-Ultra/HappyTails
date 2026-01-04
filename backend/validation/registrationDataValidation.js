@@ -5,10 +5,10 @@ const Joi = JoiBase.defaults((schema) =>
   schema.options({ errors: { wrap: { label: false } } })
 );
 
-newUserSchema = Joi.object({
+const registrationSchema = Joi.object({
   name: Joi.string()
     .min(2)
-    .max(30)
+    .max(50)
     .pattern(/^[a-zA-Z\s]+$/)
     .required()
     .label("Name")
@@ -16,20 +16,18 @@ newUserSchema = Joi.object({
     .messages({
       "string.empty": "{#label} is required",
       "string.min": "{#label} must be at least {#limit} characters long",
-      "string.max": "{#label} must be less than {#limit} characters long",
-      "any.required": "{#label} is required",
-      "string.pattern.base": "{#label} is invalid",
+      "string.pattern.base": "{#label} can only contain letters and spaces",
     }),
 
   email: Joi.string()
     .custom(sanitizeString)
     .email()
+    .max(100)
     .required()
     .label("Email")
     .messages({
       "string.empty": "{#label} is required",
       "string.email": "Please enter a valid {#label}",
-      "any.required": "{#label} is required",
     }),
 
   password: Joi.string()
@@ -39,32 +37,9 @@ newUserSchema = Joi.object({
     .required()
     .label("Password")
     .messages({
-      "string.empty": "{#label} is required",
-      "string.min": "{#label} must be at least {#limit} characters long",
-      "string.max": "{#label} must be less than {#limit} characters long",
       "string.pattern.base":
-        "{#label} must include at least one uppercase letter, one lowercase letter, and one number",
-      "any.required": "{#label} is required",
-    }),
-
-  // confirmPassword: Joi.string()
-  //   .valid(Joi.ref("password"))
-  //   .required()
-  //   .label("Confirm Password")
-  //   .messages({
-  //     "any.only": "{#label} must match Password",
-  //     "string.empty": "{#label} is required",
-  //     "any.required": "{#label} is required",
-  //   }),
-
-  role: Joi.string()
-    .valid("none", "adopter", "giver", "both", "admin")
-    .default("adopter")
-    .label("Role")
-    .custom(sanitizeString)
-    .messages({
-      "any.only": "{#label} must be one of: adopter, giver, or admin",
+        "{#label} must include uppercase, lowercase, and a number",
     }),
 });
 
-module.exports = newUserSchema;
+module.exports = registrationSchema;

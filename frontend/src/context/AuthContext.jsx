@@ -3,22 +3,22 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 const AuthContext = createContext(undefined);
 
 export const AuthProvider = ({ children }) => {
+  // OPTIMIZATION: Initialize state from localStorage immediately.
+  // This prevents a "flash" of unauthenticated state on refresh.
+  const [token, setToken] = useState(() => localStorage.getItem("token"));
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const isAuthenticated = Boolean(token);
 
   useEffect(() => {
-    const savedToken = localStorage.getItem("token");
-
-    if (savedToken) {
-      setToken(savedToken);
-      fetchUser(savedToken);
+    // If token exists on mount, fetch user data
+    if (token) {
+      fetchUser(token);
     } else {
       setLoading(false);
     }
-  }, []);
+  }, []); // Run once on mount
 
   const fetchUser = async (jwtToken) => {
     try {
@@ -28,7 +28,6 @@ export const AuthProvider = ({ children }) => {
 
       if (!res.ok) {
         logout();
-        setLoading(false);
         return;
       }
 
@@ -81,7 +80,6 @@ export const AuthProvider = ({ children }) => {
   const loginWithToken = (jwtToken, userData) => {
     setToken(jwtToken);
     localStorage.setItem("token", jwtToken);
-
     setLoading(true);
 
     if (userData) {
@@ -96,6 +94,7 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     setToken(null);
     localStorage.removeItem("token");
+    setLoading(false);
   };
 
   const updateProfile = (updates) => {
@@ -108,7 +107,7 @@ export const AuthProvider = ({ children }) => {
     <AuthContext.Provider
       value={{
         user,
-        token,
+        token, // Token is explicitly exposed here
         isAuthenticated,
         loading,
         login,

@@ -1,8 +1,10 @@
+import { useAuth } from "../context/AuthContext"
 import { useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 
 export default function GoogleSuccess() {
+  const { loginWithToken } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   // Use a ref to ensure the logic only runs once in Strict Mode
@@ -32,7 +34,8 @@ export default function GoogleSuccess() {
 
     // 2. Handle Success Case
     if (token) {
-      localStorage.setItem("token", token);
+      loginWithToken(token)
+      // localStorage.setItem("token", token);
 
       if (isNewUser === "true") {
         toast.success("Account created! Welcome to the platform.");
